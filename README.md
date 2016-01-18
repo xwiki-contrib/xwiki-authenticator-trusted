@@ -1,7 +1,7 @@
 **A generic XWiki authentication service based on plugable adapters to provide trusted authentication from external
 sources.**
 
-Report any bug or suggest new feature in http://jira.xwiki.org/browse/TRUSTEDAUTH.
+Report any bug or suggest new feature in [JIRA TRUSTAUTH project](http://jira.xwiki.org/browse/TRUSTAUTH)
 
 This extension bridge the old `XWikiAuthService` with the new component architecture of XWiki. It is oriented to 
 ease the development of trusted authenticators by using configurable adapter components, that bridge the effective
