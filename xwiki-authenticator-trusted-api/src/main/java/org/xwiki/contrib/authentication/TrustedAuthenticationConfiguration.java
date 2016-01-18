@@ -141,6 +141,7 @@ public interface TrustedAuthenticationConfiguration
      * @param name the property name
      * @param separator the value separator
      * @param def the default set of value to be used when no value for the property has been found
+     * @param forceLowerCaseKey when true, key of the map are forced to lowercase
      * @return the set of values assigned to a property or the default set of value
      */
     Map<String, String> getCustomPropertyAsMap(String name, char separator, Map<String, String> def,
@@ -155,6 +156,7 @@ public interface TrustedAuthenticationConfiguration
      * @param name the property name
      * @param separator the value separator
      * @param def the default set of value to be used when no value for the property has been found
+     * @param left when true, key is on the left and value is on the right
      * @return the set of values assigned to a property or the default set of value
      */
     Map<String, Collection<String>> getCustomPropertyAsMapOfSet(String name, char separator,

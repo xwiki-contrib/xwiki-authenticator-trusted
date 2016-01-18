@@ -31,13 +31,12 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.contrib.authentication.AuthenticationPersistenceStore;
-import org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration;
 import org.xwiki.contrib.authentication.TrustedAuthenticationAdapter;
 
 import com.xpn.xwiki.user.api.XWikiAuthService;
 
 /**
- * Default implementation of {@link TrustedAuthenticationConfiguration}
+ * Default implementation of {@link org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration}.
  *
  * @version $Id$
  */
@@ -71,8 +70,11 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
     private static final char PROPERTY_MAPPING_SEP = '|';
 
     @Inject
-    ComponentManager componentManager;
+    private ComponentManager componentManager;
 
+    /**
+     * Default constructor.
+     */
     public DefaultTrustedAuthenticationConfiguration()
     {
         super(PREF_PREFIX, CONF_PREFIX);

@@ -45,6 +45,7 @@ public interface UserManager
      * Create the user with the given user attributes.
      *
      * @param user the reference of the user document.
+     * @param extended the list of extended properties to be assigned in the user profile.
      * @return true when the user has been successfully created
      */
     boolean createUser(DocumentReference user, Map<String, String> extended);

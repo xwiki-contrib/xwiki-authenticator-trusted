@@ -50,6 +50,10 @@ import com.xpn.xwiki.objects.classes.BaseClass;
 @Singleton
 public class DefaultUserManager implements UserManager
 {
+    private static final String USER_PROPERTY_ACTIVE = "active";
+
+    private static final String GROUP_PROPERTY_MEMBER = "member";
+
     @Inject
     private Logger logger;
     
@@ -77,8 +81,8 @@ public class DefaultUserManager implements UserManager
             extended.putAll(extInfo);
         }
 
-        if (extended.get("active") == null) {
-            extended.put("active", "1");
+        if (extended.get(USER_PROPERTY_ACTIVE) == null) {
+            extended.put(USER_PROPERTY_ACTIVE, "1");
         }
 
         try {
@@ -192,7 +196,7 @@ public class DefaultUserManager implements UserManager
 
             groupDoc = groupDoc.clone();
             // Get and remove the specific group membership object for the user
-            BaseObject groupObj = groupDoc.getXObject(groupClass.getReference(), "member", userName);
+            BaseObject groupObj = groupDoc.getXObject(groupClass.getReference(), GROUP_PROPERTY_MEMBER, userName);
 
             if (groupObj != null) {
                 groupDoc.removeXObject(groupObj);
@@ -232,12 +236,12 @@ public class DefaultUserManager implements UserManager
             }
 
             // Get and remove the specific group membership object for the user
-            BaseObject groupObj = groupDoc.getXObject(groupClass.getReference(), "member", userName);
+            BaseObject groupObj = groupDoc.getXObject(groupClass.getReference(), GROUP_PROPERTY_MEMBER, userName);
 
             if (groupObj == null) {
                 // Add a member object to document
                 BaseObject memberObj = groupDoc.newXObject(groupClass.getReference(), context);
-                memberObj.setStringValue("member", userName);
+                memberObj.setStringValue(GROUP_PROPERTY_MEMBER, userName);
 
                 // Save modifications
                 context.getWiki().saveDocument(groupDoc, comment, context);

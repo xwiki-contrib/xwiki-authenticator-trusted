@@ -134,7 +134,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
                     userProfile);
                 return authenticatedUser;
             } else {
-                logger.debug("Clearing persistenceStore, removing [{}].", currentUser);
+                logger.debug("Authentication changed, clearing persistenceStore, removing [{}].", currentUser);
                 persistenceStore.clear();
             }
         }
@@ -147,9 +147,9 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
             return null;
         }
 
-        logger.debug("User [{}] saved to persistence store.", authenticatedUser);
         persistenceStore.store(authenticatedUser);
-        logger.debug("User [{}] authenticated from the authentication adapter.", authenticatedUser);
+        logger.debug("User [{}] authenticated from the authentication adapter an saved to persistence store.",
+            authenticatedUser);
         return authenticatedUser;
     }
 
@@ -173,7 +173,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
                 if (!userManager.createUser(user, extInfos)) {
                     return null;
                 }
-            } else if (!extInfos.isEmpty()){
+            } else if (!extInfos.isEmpty()) {
                 logger.debug("Synchronizing profile for user [{}]...", user);
                 userManager.synchronizeUserProperties(user, extInfos,
                     "Trusted authenticator user profile synchronization");

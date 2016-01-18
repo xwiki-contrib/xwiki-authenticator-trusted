@@ -58,12 +58,19 @@ public abstract class AbstractConfig implements TrustedAuthenticationConfigurati
     private final String prefPrefix;
     private final String confPrefix;
 
+    /**
+     * Constructor.
+     *
+     * @param prefPrefix the preference prefix
+     * @param confPrefix the configuration file prefix
+     */
     public AbstractConfig(String prefPrefix, String confPrefix)
     {
         this.prefPrefix = prefPrefix + '_';
         this.confPrefix = confPrefix + '.';
     }
 
+    @Override
     public boolean getCustomPropertyAsBoolean(String name, boolean def)
     {
         String param = getCustomProperty(name, null);
@@ -73,6 +80,7 @@ public abstract class AbstractConfig implements TrustedAuthenticationConfigurati
         return def;
     }
 
+    @Override
     public String getCustomProperty(String name, String def)
     {
         XWikiContext context = contextProvider.get();
@@ -101,6 +109,7 @@ public abstract class AbstractConfig implements TrustedAuthenticationConfigurati
         return param;
     }
 
+    @Override
     public List<String> getCustomPropertyAsList(String name, char separator, List<String> def)
     {
         List<String> list = def;
@@ -118,6 +127,7 @@ public abstract class AbstractConfig implements TrustedAuthenticationConfigurati
         return list;
     }
 
+    @Override
     public Set<String> getCustomPropertyAsSet(String name, char separator, Set<String> def)
     {
         Set<String> set = def;
@@ -135,6 +145,7 @@ public abstract class AbstractConfig implements TrustedAuthenticationConfigurati
         return set;
     }
 
+    @Override
     public Map<String, String> getCustomPropertyAsMap(String name, char separator, Map<String, String> def,
         boolean forceLowerCaseKey)
     {
@@ -165,6 +176,7 @@ public abstract class AbstractConfig implements TrustedAuthenticationConfigurati
         return mappings;
     }
 
+    @Override
     public Map<String, Collection<String>> getCustomPropertyAsMapOfSet(String name, char separator,
         Map<String, Collection<String>> def, boolean left)
     {
@@ -189,22 +201,27 @@ public abstract class AbstractConfig implements TrustedAuthenticationConfigurati
                         String rightProperty =
                             left ? mapping.substring(splitIndex + 1) : mapping.substring(0, splitIndex);
 
-                        Collection<String> rightCollection = oneToMany.get(leftProperty);
+                        getOrCreateMappedSet(oneToMany, leftProperty).add(rightProperty);
 
-                        if (rightCollection == null) {
-                            rightCollection = new HashSet<String>();
-                            oneToMany.put(leftProperty, rightCollection);
-                        }
-
-                        rightCollection.add(rightProperty);
-
-                        logger.debug("[{}] mapping found: {}", name, leftProperty + " " + rightCollection);
+                        logger.debug("[{}] mapping found: {}", name, leftProperty + " " + rightProperty);
                     }
                 }
             }
         }
 
         return oneToMany;
+    }
+
+    private static Collection<String> getOrCreateMappedSet(Map<String, Collection<String>> oneToMany,
+        String leftProperty)
+    {
+        Collection<String> rightCollection = oneToMany.get(leftProperty);
+
+        if (rightCollection == null) {
+            rightCollection = new HashSet<String>();
+            oneToMany.put(leftProperty, rightCollection);
+        }
+        return rightCollection;
     }
 
     private List<String> splitParam(String text, char delimiter)
