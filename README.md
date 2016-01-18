@@ -13,6 +13,22 @@ authenticator.
 
 # Trusted authenticator API
 
+The general behavior of the trusted authentication is:
+
+  * If persistent store is trusted and not null, return the already authenticated user
+  * `getUserId()` from the adapter:
+    * if user is null, return with public access
+    * else compute the user profile reference from `getUserName()`, replacing `.` by `=` and `@` by `_`
+      * if user is found in persistence store, return that authenticated user
+      * else, check user for existance:
+        * if the user exists, synchronize user properties and group membership
+        * else create user and synchronize group membership
+        * stores the authenticated user to persistence store and returns it
+           
+Currently, it is mandatory that `getUserId()` and `getUserName()` returns the exact same value. In a
+future version it is expected that only `getUserId()` should be unique, and `getUserName()` a more
+meaningful value that may have duplicates, without causing confusions.
+
 ## General configuration
 
 ### xwiki.cfg file
@@ -99,6 +115,17 @@ information about logging in XWiki.
 # Adapters
 
 ## Headers
+
+Provides XWiki authentication by trusting HTTP Headers and getting information about new users from those same headers.
+
+This authenticator has the following specific behavior:
+
+ * getUserId(): Check and verify the `secret_field` http header against the `secret_value`, and on success returns the
+   value of the `auth_field` http header
+ * getUserName(): returns the value of the `id_field` http header
+ * getUserProperty(): returns the value of the http header having the given name
+ * isUserInRole(): return true if the splitted array of the `group_field` http header by the `group_value_separator`
+   contains the given name
 
 ### Specific configuration
 
