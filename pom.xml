@@ -40,7 +40,7 @@
   <packaging>pom</packaging>
   <modules>
     <module>xwiki-authenticator-trusted-api</module>
-    <module>xwiki-authenticator-trusted-headers</module>
+    <module>xwiki-authenticator-trusted-adapters</module>
   </modules>
   <developers>
     <developer>
