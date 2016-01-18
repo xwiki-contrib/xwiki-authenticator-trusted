@@ -22,15 +22,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>xwiki-authenticator-trusted</artifactId>
     <groupId>org.xwiki.contrib.authentication</groupId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
-
   <artifactId>xwiki-authenticator-trusted-adapters</artifactId>
   <packaging>pom</packaging>
+  <description>Trusted XWiki authentication adapters</description>
   <modules>
     <module>xwiki-authenticator-trusted-headers</module>
   </modules>
