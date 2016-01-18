@@ -1,4 +1,4 @@
-**A generic XWiki authentication service based on plugable adapters to provide trusted authentication from external
+**A generic XWiki authentication service based on pluggable adapters to provide trusted authentication from external
 sources.**
 
 Report any bug or suggest new feature in [JIRA TRUSTAUTH project](http://jira.xwiki.org/browse/TRUSTAUTH)

@@ -27,9 +27,9 @@
     <version>1.1-SNAPSHOT</version>
   </parent>
   <artifactId>xwiki-authenticator-trusted-headers</artifactId>
-  <name>Trusted Headers Authenticator for XWiki</name>
+  <name>Headers Trusted Authentication Adapter</name>
   <version>1.1-SNAPSHOT</version>
-  <description>Trusted XWiki authentication based on HTTP headers</description>
+  <description>Adapter for the Trusted authentication framework that base authentication on HTTP headers</description>
   <dependencies>
     <dependency>
       <groupId>org.xwiki.platform</groupId>

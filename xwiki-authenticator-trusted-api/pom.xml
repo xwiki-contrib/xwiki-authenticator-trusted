@@ -27,9 +27,9 @@
     <version>1.1-SNAPSHOT</version>
   </parent>
   <artifactId>xwiki-authenticator-trusted-api</artifactId>
-  <name>API for trusted authentication in XWiki</name>
+  <name>Trusted authentication framework</name>
   <version>1.1-SNAPSHOT</version>
-  <description>A plugable component based trusted authentication solution that ease integration custom authenticator</description>
+  <description>A generic XWiki authentication service based on pluggable adapters to provide trusted authentication from external sources</description>
   <dependencies>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
