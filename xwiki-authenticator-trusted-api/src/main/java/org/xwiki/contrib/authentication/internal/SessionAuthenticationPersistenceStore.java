@@ -47,16 +47,16 @@ import com.xpn.xwiki.web.XWikiRequest;
 public class SessionAuthenticationPersistenceStore implements AuthenticationPersistenceStore
 {
     /**
-     * Use a random key to store user in session, making uneasy to temper it :)
+     * Use a random key to store user in session, making uneasy to temper it :).
      */
     private static final String USERNAME_SESSION_KEY =
         RandomStringUtils.randomAlphanumeric(ThreadLocalRandom.current().nextInt(10, 21));
 
     @Inject
-    Logger logger;
+    private Logger logger;
 
     @Inject
-    Provider<XWikiContext> contextProvider;
+    private Provider<XWikiContext> contextProvider;
 
     /**
      * @return the current session (create a new one if needed), or null if request is not available.

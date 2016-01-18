@@ -60,9 +60,10 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
     private static final String DEFAULT_GROUP_VALUE_SEPARATOR = "\\|";
 
     @Inject
-    Logger logger;
+    private Logger logger;
 
-    @Inject TrustedAuthenticationConfiguration configuration;
+    @Inject
+    private TrustedAuthenticationConfiguration configuration;
 
     @Inject
     private Provider<XWikiContext> contextProvider;

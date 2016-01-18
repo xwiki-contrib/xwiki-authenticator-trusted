@@ -41,7 +41,8 @@ public class XWikiTrustedAuthenticator extends XWikiAuthServiceImpl
 
     private TrustedAuthenticator authenticator = Utils.getComponent(TrustedAuthenticator.class);
 
-    private TrustedAuthenticationConfiguration configuration = Utils.getComponent(TrustedAuthenticationConfiguration.class);
+    private TrustedAuthenticationConfiguration configuration =
+        Utils.getComponent(TrustedAuthenticationConfiguration.class);
 
     /**
      * {@inheritDoc}
@@ -51,7 +52,7 @@ public class XWikiTrustedAuthenticator extends XWikiAuthServiceImpl
     @Override
     public XWikiUser checkAuth(XWikiContext context) throws XWikiException
     {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Checking trusted authentication...");
         }
         String authenticatedUser = authenticator.authenticate();

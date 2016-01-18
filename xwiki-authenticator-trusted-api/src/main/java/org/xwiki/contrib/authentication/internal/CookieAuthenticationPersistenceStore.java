@@ -57,7 +57,7 @@ public class CookieAuthenticationPersistenceStore implements AuthenticationPersi
     private static final String AUTHENTICATION_CONFIG_PREFIX = "xwiki.authentication";
 
     private static final String COOKIE_PREFIX_PROPERTY = AUTHENTICATION_CONFIG_PREFIX + ".cookieprefix";
-    private static final String COOKIE_PATH_PROPERTY= AUTHENTICATION_CONFIG_PREFIX + ".cookiepath";
+    private static final String COOKIE_PATH_PROPERTY = AUTHENTICATION_CONFIG_PREFIX + ".cookiepath";
     private static final String COOKIE_DOMAINS_PROPERTY = AUTHENTICATION_CONFIG_PREFIX + ".cookiedomains";
     private static final String ENCRYPTION_KEY_PROPERTY = AUTHENTICATION_CONFIG_PREFIX + ".encryptionKey";
 
@@ -70,15 +70,17 @@ public class CookieAuthenticationPersistenceStore implements AuthenticationPersi
      */
     private static final String COOKIE_DOT_PFX = ".";
 
+    private static final String EQUAL_SIGN = "=";
+    private static final String UNDERSCORE = "_";
 
     @Inject
-    Logger logger;
+    private Logger logger;
 
     @Inject
-    Provider<XWikiContext> contextProvider;
+    private Provider<XWikiContext> contextProvider;
 
     @Inject
-    TrustedAuthenticationConfiguration config;
+    private TrustedAuthenticationConfiguration config;
 
     private String cookiePfx;
     private String cookiePath;
@@ -109,7 +111,7 @@ public class CookieAuthenticationPersistenceStore implements AuthenticationPersi
         try {
             encryptionCipher = getCipher(true);
             decryptionCipher = getCipher(false);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new InitializationException("Unable to initialize ciphers", e);
         }
     }
@@ -166,7 +168,8 @@ public class CookieAuthenticationPersistenceStore implements AuthenticationPersi
     private String encryptText(String text)
     {
         try {
-            return new String(Base64.encodeBase64(encryptionCipher.doFinal(text.getBytes()))).replaceAll("=", "_");
+            return new String(Base64.encodeBase64(encryptionCipher.doFinal(text.getBytes())))
+                .replaceAll(EQUAL_SIGN, UNDERSCORE);
         } catch (Exception e) {
             logger.error("Failed to encrypt text", e);
         }
@@ -177,7 +180,7 @@ public class CookieAuthenticationPersistenceStore implements AuthenticationPersi
     {
         try {
             return new String(decryptionCipher.doFinal(
-                Base64.decodeBase64(text.replaceAll("_", "=").getBytes("ISO-8859-1"))));
+                Base64.decodeBase64(text.replaceAll(UNDERSCORE, EQUAL_SIGN).getBytes("ISO-8859-1"))));
         } catch (Exception e) {
             logger.error("Failed to decrypt text", e);
         }
