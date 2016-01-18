@@ -24,11 +24,11 @@
   <parent>
     <groupId>org.xwiki.contrib.authentication</groupId>
     <artifactId>xwiki-authenticator-trusted-adapters</artifactId>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
   </parent>
   <artifactId>xwiki-authenticator-trusted-headers</artifactId>
   <name>Trusted Headers Authenticator for XWiki</name>
-  <version>1.0</version>
+  <version>1.1-SNAPSHOT</version>
   <description>Trusted XWiki authentication based on HTTP headers</description>
   <dependencies>
     <dependency>
