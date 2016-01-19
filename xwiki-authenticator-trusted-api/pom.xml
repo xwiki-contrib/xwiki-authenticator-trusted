@@ -24,11 +24,11 @@
   <parent>
     <groupId>org.xwiki.contrib.authentication</groupId>
     <artifactId>xwiki-authenticator-trusted</artifactId>
-    <version>1.0.2</version>
+    <version>1.1-SNAPSHOT</version>
   </parent>
   <artifactId>xwiki-authenticator-trusted-api</artifactId>
   <name>Trusted authentication framework</name>
-  <version>1.0.2</version>
+  <version>1.1-SNAPSHOT</version>
   <description>A generic XWiki authentication service based on pluggable adapters to provide trusted authentication from external sources</description>
   <dependencies>
     <dependency>
