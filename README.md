@@ -44,7 +44,7 @@ authenticator.
     #-# Here is an example using a 1 day TTL, which means the persistence is kept for 1 day after last response.
     #-# Combine with the above parameter, this could also keep the authentication for a longer period than
     #-# the one of the external authenticator, but this is obviously less secure.
-    xwiki.authentication.trusted.persistenceStoreTTL=84600;
+    # xwiki.authentication.trusted.persistenceStoreTTL=84600;
  
     #-# By default, on failure to find an authenticated user, the authentication fallback (to a custom fallback or
     #-# the default XWiki authentication). To prevent fallbacking, and return public access on failure to find an
