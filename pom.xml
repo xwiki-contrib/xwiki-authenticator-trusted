@@ -51,9 +51,13 @@
   <scm>
     <connection>scm:git:git://github.com/xwiki-contrib/xwiki-authenticator-trusted.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/xwiki-authenticator-trusted.git</developerConnection>
-    <url>https://github.com/xwiki-contrib/xwiki-authenticator-trusted</url>
+    <url>https://github.com/xwiki-contrib/xwiki-authenticator-trusted/tree/master/</url>
     <tag>HEAD</tag>
   </scm>
+  <issueManagement>
+    <system>jira</system>
+    <url>http://jira.xwiki.org/jira/browse/TRUSTAUTH</url>
+  </issueManagement>
   <distributionManagement>
     <repository>
       <id>xwiki-staging</id>
