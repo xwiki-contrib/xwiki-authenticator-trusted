@@ -126,7 +126,7 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
 
     private List<String> getGroupFieldHeaderValue()
     {
-        String groupFieldName = getHeader(configuration.getCustomProperty(CONFIG_GROUP_FIELD, null));
+        String groupFieldName = configuration.getCustomProperty(CONFIG_GROUP_FIELD, null);
         String headerValue = null;
         if (groupFieldName != null) {
             headerValue = getHeader(groupFieldName);
