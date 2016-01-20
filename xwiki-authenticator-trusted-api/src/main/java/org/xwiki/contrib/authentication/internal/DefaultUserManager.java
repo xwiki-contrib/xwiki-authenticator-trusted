@@ -65,12 +65,6 @@ public class DefaultUserManager implements UserManager
     private EntityReferenceSerializer<String> compactWikiEntityReferenceSerializer;
 
     @Override
-    public String getValidUserName(String userName)
-    {
-        return userName.replace('.', '=').replace('@', '_').toLowerCase();
-    }
-
-    @Override
     public boolean createUser(DocumentReference user, Map<String, String> extInfo)
     {
         logger.debug("Creating new XWiki user [{}]", user);
