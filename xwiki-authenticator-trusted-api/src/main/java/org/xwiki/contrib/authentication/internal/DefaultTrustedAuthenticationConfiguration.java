@@ -27,6 +27,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
@@ -64,8 +65,15 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
 
     private static final String FALLBACK_AUTH_PROPERTY = "fallbackAuthenticator";
 
+    private static final String USERPROFILE_CASE_PROPERTY = "userProfileCase";
+    private static final CaseStyle USERPROFILE_CASE_DEFAULT = CaseStyle.LOWERCASE;
+
+    private static final String USERPROFILE_REPLACEMENTS_PROPERTY = "userProfileReplacements";
+    private static final char USERPROFILE_REPLACEMENTS_SEP = '|';
+
     private static final String GROUP_MAPPING_PROPERTY = "groupsMapping";
     private static final char GROUP_MAPPING_SEP = '|';
+
     private static final String PROPERTY_MAPPING_PROPERTY = "propertiesMapping";
     private static final char PROPERTY_MAPPING_SEP = '|';
 
@@ -124,6 +132,25 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
             }
         }
         return PERSISTANCE_STORE_TTL_DEFAULT;
+    }
+
+    @Override
+    public CaseStyle getUserProfileCaseStyle()
+    {
+        try {
+            return CaseStyle.valueOf(
+                StringUtils.upperCase(StringUtils.trim(getCustomProperty(USERPROFILE_CASE_PROPERTY, null))));
+        } catch (Exception e) {
+            // ignored, use default
+        }
+        return USERPROFILE_CASE_DEFAULT;
+    }
+
+    @Override
+    public Map<String, String> getUserProfileReplacements()
+    {
+        return getCustomPropertyAsMap(USERPROFILE_REPLACEMENTS_PROPERTY, USERPROFILE_REPLACEMENTS_SEP,
+            Collections.<String, String>emptyMap(), false);
     }
 
     @Override

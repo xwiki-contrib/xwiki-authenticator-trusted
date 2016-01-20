@@ -31,8 +31,9 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.xwiki.contrib.authentication.AuthenticationPersistenceStore;
-import org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration;
 import org.xwiki.contrib.authentication.TrustedAuthenticationAdapter;
+import org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration;
+import org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration.CaseStyle;
 import org.xwiki.model.internal.DefaultModelConfiguration;
 import org.xwiki.model.internal.DefaultModelContext;
 import org.xwiki.test.LogRule;
@@ -96,6 +97,12 @@ public class DefaultTrustedAuthenticationConfigurationTest
     private static final boolean AUTHORITATIVE_DEFAULT = false;
 
     private static final String FALLBACK_AUTH_PROPERTY = "fallbackAuthenticator";
+
+    private static final String USERPROFILE_CASE_PROPERTY = "userProfileCase";
+    private static final CaseStyle USERPROFILE_CASE_DEFAULT = CaseStyle.LOWERCASE;
+
+    private static final String USERPROFILE_REPLACEMENTS_PROPERTY = "userProfileReplacements";
+    private static final char USERPROFILE_REPLACEMENTS_SEP = '|';
 
     private static final String GROUP_MAPPING_PROPERTY = "groupsMapping";
     private static final String PROPERTY_MAPPING_PROPERTY = "propertiesMapping";
@@ -222,6 +229,36 @@ public class DefaultTrustedAuthenticationConfigurationTest
     {
         config.put(CONF_PREFIX + PERSISTANCE_STORE_TTL_PROPERTY, "86400");
         assertThat(configuration.getPersistenceTTL(), equalTo(86400));
+    }
+
+    @Test
+    public void testDefaultUserProfileCaseStyle() throws Exception
+    {
+        assertThat(configuration.getUserProfileCaseStyle(), equalTo(USERPROFILE_CASE_DEFAULT));
+    }
+
+    @Test
+    public void testCustomUserProfileCaseStyle() throws Exception
+    {
+        config.put(CONF_PREFIX + USERPROFILE_CASE_PROPERTY, "UpperCase");
+        assertThat(configuration.getUserProfileCaseStyle(), equalTo(CaseStyle.UPPERCASE));
+    }
+
+    @Test
+    public void testDefaultUserProfileReplacements() throws Exception
+    {
+        assertThat(configuration.getUserProfileReplacements().isEmpty(), is(true));
+    }
+
+    @Test
+    public void testCustomUserProfileReplacements() throws Exception
+    {
+        config.put(CONF_PREFIX + USERPROFILE_REPLACEMENTS_PROPERTY, ".==|@=_|&=");
+        Map<String, String> expected = new HashMap<String, String>();
+        expected.put(".","=");
+        expected.put("@","_");
+        expected.put("&","");
+        assertThat(configuration.getUserProfileReplacements(), equalTo(expected));
     }
 
     @Test

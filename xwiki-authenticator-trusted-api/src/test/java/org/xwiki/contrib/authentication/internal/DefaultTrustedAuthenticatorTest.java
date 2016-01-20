@@ -22,6 +22,7 @@ package org.xwiki.contrib.authentication.internal;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,13 +35,16 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.xwiki.component.util.DefaultParameterizedType;
 import org.xwiki.contrib.authentication.AuthenticationPersistenceStore;
-import org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration;
 import org.xwiki.contrib.authentication.TrustedAuthenticationAdapter;
+import org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration;
+import org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration.CaseStyle;
 import org.xwiki.contrib.authentication.TrustedAuthenticator;
 import org.xwiki.contrib.authentication.UserManager;
 import org.xwiki.model.internal.DefaultModelConfiguration;
 import org.xwiki.model.internal.DefaultModelContext;
 import org.xwiki.model.internal.reference.DefaultEntityReferenceValueProvider;
+import org.xwiki.model.internal.reference.DefaultReferenceDocumentReferenceResolver;
+import org.xwiki.model.internal.reference.DefaultReferenceEntityReferenceResolver;
 import org.xwiki.model.internal.reference.DefaultStringDocumentReferenceResolver;
 import org.xwiki.model.internal.reference.DefaultStringEntityReferenceResolver;
 import org.xwiki.model.internal.reference.DefaultStringEntityReferenceSerializer;
@@ -70,7 +74,9 @@ import static org.mockito.Mockito.when;
     DefaultEntityReferenceValueProvider.class,
     DefaultStringEntityReferenceSerializer.class,
     DefaultStringEntityReferenceResolver.class,
-    DefaultStringDocumentReferenceResolver.class
+    DefaultStringDocumentReferenceResolver.class,
+    DefaultReferenceEntityReferenceResolver.class,
+    DefaultReferenceDocumentReferenceResolver.class
     //,DefaultLoggerManager.class,
     //DefaultObservationManager.class
 })
@@ -80,10 +86,10 @@ public class DefaultTrustedAuthenticatorTest
     private static final String USER_SPACE = "XWiki";
 
     private static final String TEST_USER = "test.user@example.com";
-    private static final String VALID_TEST_USER = "test=user_example=com";
+    private static final String VALID_TEST_USER = "test\\.user@example\\.com";
     private static final String TEST_USER_FN = USER_WIKI + ':' + USER_SPACE + '.' + VALID_TEST_USER;
 
-    private static final DocumentReference TEST_USER_REF = new DocumentReference(USER_WIKI, USER_SPACE, VALID_TEST_USER);
+    private static final DocumentReference TEST_USER_REF = new DocumentReference(USER_WIKI, USER_SPACE, TEST_USER);
 
     @Rule
     public final MockitoComponentMockingRule<TrustedAuthenticator> mocker =
@@ -120,6 +126,8 @@ public class DefaultTrustedAuthenticatorTest
         authAdapter = mock(TrustedAuthenticationAdapter.class);
         when(authConfig.getPersistenceStore()).thenReturn(store);
         when(authConfig.getAuthenticationAdapter()).thenReturn(authAdapter);
+        when(authConfig.getUserProfileCaseStyle()).thenReturn(CaseStyle.LOWERCASE);
+        when(authConfig.getUserProfileReplacements()).thenReturn(Collections.<String, String>emptyMap());
 
         userManager = mocker.getInstance(UserManager.class);
     }
@@ -165,7 +173,6 @@ public class DefaultTrustedAuthenticatorTest
         when(store.retrieve()).thenReturn(TEST_USER_FN);
         when(authAdapter.getUserUid()).thenReturn(TEST_USER);
         when(authAdapter.getUserName()).thenReturn(TEST_USER);
-        when(userManager.getValidUserName(TEST_USER)).thenReturn(VALID_TEST_USER);
         assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
         verify(store, never()).clear();
         verify(store, never()).store(any(String.class));
@@ -177,7 +184,6 @@ public class DefaultTrustedAuthenticatorTest
         when(store.retrieve()).thenReturn("xwiki:XWiki.OtherUser");
         when(authAdapter.getUserUid()).thenReturn(TEST_USER);
         when(authAdapter.getUserName()).thenReturn(TEST_USER);
-        when(userManager.getValidUserName(TEST_USER)).thenReturn(VALID_TEST_USER);
         assertThat(mocker.getComponentUnderTest().authenticate(), nullValue());
         verify(store, times(1)).clear();
         verify(store, never()).store(any(String.class));
@@ -188,7 +194,6 @@ public class DefaultTrustedAuthenticatorTest
     {
         when(authAdapter.getUserUid()).thenReturn(TEST_USER);
         when(authAdapter.getUserName()).thenReturn(TEST_USER);
-        when(userManager.getValidUserName(TEST_USER)).thenReturn(VALID_TEST_USER);
         assertThat(mocker.getComponentUnderTest().authenticate(), nullValue());
         verify(store, never()).clear();
         verify(store, never()).store(any(String.class));
@@ -200,7 +205,6 @@ public class DefaultTrustedAuthenticatorTest
         when(store.retrieve()).thenReturn("xwiki:XWiki.OtherUser");
         when(authAdapter.getUserUid()).thenReturn(TEST_USER);
         when(authAdapter.getUserName()).thenReturn(TEST_USER);
-        when(userManager.getValidUserName(TEST_USER)).thenReturn(VALID_TEST_USER);
         when(userManager.createUser(TEST_USER_REF, new HashMap<String, String>())).thenReturn(true);
         assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
         verify(store, times(1)).clear();
@@ -212,7 +216,6 @@ public class DefaultTrustedAuthenticatorTest
     {
         when(authAdapter.getUserUid()).thenReturn(TEST_USER);
         when(authAdapter.getUserName()).thenReturn(TEST_USER);
-        when(userManager.getValidUserName(TEST_USER)).thenReturn(VALID_TEST_USER);
         when(userManager.createUser(TEST_USER_REF, new HashMap<String, String>())).thenReturn(true);
         assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
         verify(store, never()).clear();
@@ -224,7 +227,6 @@ public class DefaultTrustedAuthenticatorTest
     {
         when(authAdapter.getUserUid()).thenReturn(TEST_USER);
         when(authAdapter.getUserName()).thenReturn(TEST_USER);
-        when(userManager.getValidUserName(TEST_USER)).thenReturn(VALID_TEST_USER);
         when(xwikimock.exists(TEST_USER_REF, context)).thenReturn(true);
         assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
         verify(store, never()).clear();
@@ -278,7 +280,6 @@ public class DefaultTrustedAuthenticatorTest
                 }
             }
         );
-        when(userManager.getValidUserName(TEST_USER)).thenReturn(VALID_TEST_USER);
         when(xwikimock.exists(TEST_USER_REF, context)).thenReturn(true);
         assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
         verify(store, never()).clear();
@@ -289,10 +290,10 @@ public class DefaultTrustedAuthenticatorTest
     private Map<String, Collection<String>> getGroupMapping()
     {
         Map<String, Collection<String>> groupMapping = new HashMap<String, Collection<String>>();
-        groupMapping.put("XWiki.GroupA", Arrays.asList("groupa", "groupc"));
+        groupMapping.put("GroupA", Arrays.asList("groupa", "groupc"));
         groupMapping.put("XWiki.GroupB", Arrays.asList("groupb"));
         groupMapping.put("XWiki.GroupC", Arrays.asList("groupc"));
-        groupMapping.put("XWiki.GroupD", Arrays.asList("groupa", "groupd"));
+        groupMapping.put("GroupD", Arrays.asList("groupa", "groupd"));
         return groupMapping;
     }
 
@@ -303,7 +304,6 @@ public class DefaultTrustedAuthenticatorTest
         when(authAdapter.getUserUid()).thenReturn(TEST_USER);
         when(authAdapter.getUserName()).thenReturn(TEST_USER);
         when(authAdapter.isUserInRole("groupc")).thenReturn(true);
-        when(userManager.getValidUserName(TEST_USER)).thenReturn(VALID_TEST_USER);
         when(xwikimock.exists(TEST_USER_REF, context)).thenReturn(true);
         assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
         verify(store, never()).clear();

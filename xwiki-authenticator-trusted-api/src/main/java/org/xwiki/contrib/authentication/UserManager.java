@@ -35,13 +35,6 @@ import org.xwiki.model.reference.DocumentReference;
 public interface UserManager
 {
     /**
-     * Return a normalized lowercase username. It replace dot sign by equal sign and at sign by underscore.
-     * @param userName the username to normalize.
-     * @return a normalized name.
-     */
-    String getValidUserName(String userName);
-
-    /**
      * Create the user with the given user attributes.
      *
      * @param user the reference of the user document.

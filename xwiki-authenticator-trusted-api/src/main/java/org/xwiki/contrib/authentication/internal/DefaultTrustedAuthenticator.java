@@ -71,7 +71,10 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     private UserManager userManager;
 
     @Inject
-    private DocumentReferenceResolver<String> defaultDocumentReferenceResolver;
+    private DocumentReferenceResolver<EntityReference> defaultEntityDocumentReferenceResolver;
+
+    @Inject
+    private DocumentReferenceResolver<String> defaultStringDocumentReferenceResolver;
 
     @Inject
     private EntityReferenceSerializer<String> entityReferenceSerializer;
@@ -124,7 +127,9 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
         }
 
         DocumentReference userProfile =
-            defaultDocumentReferenceResolver.resolve(userManager.getValidUserName(userName), USER_SPACE_REFERENCE);
+            defaultEntityDocumentReferenceResolver.resolve(
+                new EntityReference(getCleanedUpUsername(getCaseNormalizedName(userName)), EntityType.DOCUMENT),
+                USER_SPACE_REFERENCE);
         String authenticatedUser = entityReferenceSerializer.serialize(userProfile);
 
         if (currentUser != null) {
@@ -151,6 +156,44 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
         logger.debug("User [{}] authenticated from the authentication adapter an saved to persistence store.",
             authenticatedUser);
         return authenticatedUser;
+    }
+
+    /**
+     * Apply replacements to clean up username for defining the user profile name.
+     *
+     * @param userName userName to clean
+     * @return cleaned up userName
+     */
+    private String getCleanedUpUsername(String userName)
+    {
+        String result = userName;
+        for (Map.Entry<String, String> replacement : configuration.getUserProfileReplacements().entrySet()) {
+            result = result.replace(replacement.getKey(), replacement.getValue());
+        }
+        return result;
+    }
+
+    /**
+     * Apply replacements to clean up username for defining the user profile name.
+     *
+     * @param userName userName to clean
+     * @return cleaned up userName
+     */
+    private String getCaseNormalizedName(String userName)
+    {
+        switch (configuration.getUserProfileCaseStyle()) {
+            case LOWERCASE:
+                return userName.toLowerCase();
+            case TITLECASE:
+                if (userName.length() > 1) {
+                    return userName.substring(0, 1).toUpperCase() + userName.substring(1).toLowerCase();
+                }
+                return userName.toUpperCase();
+            case UPPERCASE:
+                return userName.toUpperCase();
+            default:
+                return userName;
+        }
     }
 
     /**
@@ -257,7 +300,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
             this.groupMappings = new HashMap<DocumentReference, Collection<String>>();
             for (Map.Entry<String, Collection<String>> mapping : mappings.entrySet()) {
                 this.groupMappings.put(
-                    defaultDocumentReferenceResolver.resolve(mapping.getKey(), USER_SPACE_REFERENCE),
+                    defaultStringDocumentReferenceResolver.resolve(mapping.getKey(), USER_SPACE_REFERENCE),
                     mapping.getValue());
             }
         }

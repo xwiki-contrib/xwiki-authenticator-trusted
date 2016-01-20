@@ -38,6 +38,16 @@ import com.xpn.xwiki.user.api.XWikiAuthService;
 public interface TrustedAuthenticationConfiguration
 {
     /**
+     * Letter case styles.
+     */
+    enum CaseStyle {
+        UPPERCASE,
+        LOWERCASE,
+        TITLECASE,
+        NONE
+    }
+
+    /**
      * Return the authentication adapter that will bridge the trusted authentication with this generic
      * trusted authenticator.
      * @return the authentication adapter used for retrieving user information.
@@ -65,6 +75,16 @@ public interface TrustedAuthenticationConfiguration
      */
     int getPersistenceTTL();
 
+    /**
+     * @return the case style to be applied to username for defining the name of the user profile page.
+     */
+    CaseStyle getUserProfileCaseStyle();
+
+    /**
+     * @return the character replacements that should be applied to username for defining the name of the user profile
+     * page, after having applied the user profile case style.
+     */
+    Map<String, String> getUserProfileReplacements();
 
     /**
      * Retrieve the mapping between XWiki user properties and user property provided by the AuthenticationAdapter.

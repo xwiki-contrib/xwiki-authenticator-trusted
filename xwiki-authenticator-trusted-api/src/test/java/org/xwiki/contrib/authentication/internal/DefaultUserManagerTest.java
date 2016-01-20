@@ -211,13 +211,7 @@ public class DefaultUserManagerTest
         return oldcore.getMockXWiki().getDocument(new DocumentReference(USER_WIKI, USER_SPACE, userGroup),
             context);
     }
-
-    @Test
-    public void testGetValidUsername() throws Exception
-    {
-        assertThat(userManager.getValidUserName(TEST_USER), equalTo(VALID_TEST_USER));
-    }
-
+    
     private Map<String, String> getExtendedInfo()
     {
         Map<String, String> extInfo = new HashMap<>();

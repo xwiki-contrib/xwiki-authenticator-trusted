@@ -57,13 +57,25 @@ authenticator.
     #-# just have a negative performance impact.
     # xwiki.authentication.trusted.fallbackAuthenticator=com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl
 
+    #-# Define the letter case transformation that needs to be applied on username provided by the adapter
+    #-# to create the name of the user profile page. This letter case transformation is done first, before the
+    #-# replacements defined in the next parameter. The default is to lowercase the username.
+    #-# Possible transformation are: lowercase (default), uppercase, titlecase, none
+    # xwiki.authentication.trusted.userProfileCase=none
+
+    #-# Define characters or substring replacements to be applied on the username provided by the adapter after
+    #-# the above case transformation, to create the name of the user profile page. Replacement are of the form
+    #-# find=replace and separated by pipes. The default is to not make any replacement
+    #-# Before the introduction of this parameter, the default was different, you can reactivate it by uncommenting:
+    # xwiki.authentication.trusted.userProfileReplacements=.==|@=_
+
     #-# Mapping between XWiki group name and external authentication role name.
     #-# Mapping are separated with the pipe character, and the same XWiki group can be mapped multiple times to
     #-# different external roles.
-    # xwiki.authentication.trusted.groupsMapping=XWiki.XWikiGroupA=groupA|XWiki.XWikiGroupB=groupB|XWiki.XWikiGroupA=groupAbis
+    # xwiki.authentication.trusted.groupsMapping=XWikiGroupA=groupA|Space.XWikiGroupB=groupB|XWikiGroupA=groupAbis
     
     #-# Mapping between XWiki users property name and external user property names.
-    # xwiki.authentication.trusted.propertiesMapping=email=mail,first_name=givenname,last_name=sn
+    # xwiki.authentication.trusted.propertiesMapping=email=mail|first_name=givenname|last_name=sn
     
 
 ### XWikiPreferences
