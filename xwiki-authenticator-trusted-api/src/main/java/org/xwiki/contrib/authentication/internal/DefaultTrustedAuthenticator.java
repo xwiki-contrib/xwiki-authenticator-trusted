@@ -35,8 +35,8 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.contrib.authentication.AuthenticationPersistenceStore;
-import org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration;
 import org.xwiki.contrib.authentication.TrustedAuthenticationAdapter;
+import org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration;
 import org.xwiki.contrib.authentication.TrustedAuthenticator;
 import org.xwiki.contrib.authentication.UserManager;
 import org.xwiki.model.EntityType;
@@ -99,63 +99,84 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     public String authenticate()
     {
         logger.debug("Starting trusted authentication...");
-        String currentUser = persistenceStore.retrieve();
+        String previouslyAuthenticatedUser = persistenceStore.retrieve();
 
         if (configuration.isPersistenceStoreTrusted()) {
-            if (currentUser != null) {
-                logger.debug("User [{}] authenticated from trusted persistence store.", currentUser);
-                return currentUser;
+            if (previouslyAuthenticatedUser != null) {
+                logger.debug("User [{}] authenticated from trusted persistence store.", previouslyAuthenticatedUser);
+                return previouslyAuthenticatedUser;
             }
         }
 
         String userUid = authenticationAdapter.getUserUid();
         if (userUid == null) {
             logger.debug("No user available from trusted authenticator.");
-            if (currentUser != null) {
-                logger.debug("Clearing persistenceStore, removing [{}].", currentUser);
+            if (previouslyAuthenticatedUser != null) {
+                logger.debug("Clearing persistenceStore, removing [{}].", previouslyAuthenticatedUser);
                 persistenceStore.clear();
             }
             logger.debug("Trusted authentication ended with public access.");
             return null;
         }
 
-        logger.debug("User [{}] retrieved from the authentication adapter.", userUid);
+        return authenticate(previouslyAuthenticatedUser, userUid);
+    }
 
-        String userName = authenticationAdapter.getUserName();
-        if (!userUid.equals(userName)) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
+    /**
+     * Proceed to the authentication, creating and synchronizing user if needed based on the previous authentication.
+     *
+     * @param previouslyAuthenticatedUser the previously authenticated user retrieved from the store.
+     * @param currentUserUid the user Uid to be authenticated now.
+     * @return the finally authenticated user.
+     */
+    private String authenticate(String previouslyAuthenticatedUser, String currentUserUid)
+    {
+        logger.debug("User [{}] retrieved from the authentication adapter.", currentUserUid);
 
-        DocumentReference userProfile =
-            defaultEntityDocumentReferenceResolver.resolve(
-                new EntityReference(getCleanedUpUsername(getCaseNormalizedName(userName)), EntityType.DOCUMENT),
-                USER_SPACE_REFERENCE);
+        DocumentReference userProfile = getUserProfileReference(currentUserUid);
         String authenticatedUser = entityReferenceSerializer.serialize(userProfile);
 
-        if (currentUser != null) {
-            logger.debug("User [{}] retrieved from untrusted persistence store.", currentUser);
-            if (authenticatedUser.equals(currentUser)) {
+        if (previouslyAuthenticatedUser != null) {
+            logger.debug("User [{}] retrieved from untrusted persistence store.", previouslyAuthenticatedUser);
+            if (authenticatedUser.equals(previouslyAuthenticatedUser)) {
                 logger.debug("User [{}] authenticated from the authentication adapter, no synchronization.",
                     userProfile);
                 return authenticatedUser;
             } else {
-                logger.debug("Authentication changed, clearing persistenceStore, removing [{}].", currentUser);
+                logger.debug("Authentication changed, clearing persistenceStore, removing [{}].",
+                    previouslyAuthenticatedUser);
                 persistenceStore.clear();
             }
         }
 
-        userProfile = synchronizedUser(userProfile);
-
-        if (userProfile == null) {
+        if (!synchronizeUser(userProfile)) {
             logger.error("Unable to synchronize user profile for user [{}], ended with public access.",
                 authenticatedUser);
             return null;
         }
 
         persistenceStore.store(authenticatedUser);
-        logger.debug("User [{}] authenticated from the authentication adapter an saved to persistence store.",
+        logger.debug("User [{}] authenticated from the authentication adapter and saved to persistence store.",
             authenticatedUser);
         return authenticatedUser;
+    }
+
+    /**
+     * Return the reference to the user profile of the user being authenticated.
+     *
+     * @param userUid the userUid retrieved from the authentication adapter (could not be any other userUid).
+     * @return the reference to the user profile (existing or to be created).
+     */
+    private DocumentReference getUserProfileReference(String userUid)
+    {
+        String userName = authenticationAdapter.getUserName();
+        if (!userUid.equals(userName)) {
+            throw new UnsupportedOperationException("Not yet implemented");
+        }
+
+        return defaultEntityDocumentReferenceResolver.resolve(
+            new EntityReference(getCleanedUpUsername(getCaseNormalizedName(userName)), EntityType.DOCUMENT),
+            USER_SPACE_REFERENCE);
     }
 
     /**
@@ -200,8 +221,9 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
      * Create the user if needed, or synchronize it and synchronize user in mapped groups.
      *
      * @param user the reference of the user document.
+     * @return true if the user has been successfully created and/or synchronized.
      */
-    private DocumentReference synchronizedUser(DocumentReference user)
+    private boolean synchronizeUser(DocumentReference user)
     {
         XWikiContext context = contextProvider.get();
         String database = context.getDatabase();
@@ -214,7 +236,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
             if (!context.getWiki().exists(user, context)) {
                 logger.debug("Creating user [{}]...", user);
                 if (!userManager.createUser(user, extInfos)) {
-                    return null;
+                    return false;
                 }
             } else if (!extInfos.isEmpty()) {
                 logger.debug("Synchronizing profile for user [{}]...", user);
@@ -226,7 +248,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
         } finally {
             context.setDatabase(database);
         }
-        return user;
+        return true;
     }
 
     /**
