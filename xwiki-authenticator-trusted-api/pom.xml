@@ -32,6 +32,9 @@
   <name>API for trusted authentication in XWiki</name>
   <version>1.0-SNAPSHOT</version>
   <description>A plugable component based trusted authentication solution that ease integration custom authenticator</description>
+  <properties>
+    <xwiki.jacoco.instructionRatio>0.84</xwiki.jacoco.instructionRatio>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
