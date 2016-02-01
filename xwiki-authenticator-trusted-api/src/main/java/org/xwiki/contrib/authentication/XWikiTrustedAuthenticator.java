@@ -22,6 +22,8 @@ package org.xwiki.contrib.authentication;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReferenceSerializer;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -44,6 +46,9 @@ public class XWikiTrustedAuthenticator extends XWikiAuthServiceImpl
     private TrustedAuthenticationConfiguration configuration =
         Utils.getComponent(TrustedAuthenticationConfiguration.class);
 
+    private EntityReferenceSerializer<String> compactWikiStringEntityReferenceSerializer =
+        Utils.getComponent(EntityReferenceSerializer.TYPE_STRING, "compactwiki");
+
     /**
      * {@inheritDoc}
      *
@@ -55,10 +60,10 @@ public class XWikiTrustedAuthenticator extends XWikiAuthServiceImpl
         if (LOG.isDebugEnabled()) {
             LOG.debug("Checking trusted authentication...");
         }
-        String authenticatedUser = authenticator.authenticate();
+        DocumentReference authenticatedUser = authenticator.authenticate();
         if (authenticatedUser != null) {
             LOG.debug("Successful trusted authentication for user [{}]", authenticatedUser);
-            return new XWikiUser(authenticatedUser);
+            return new XWikiUser(compactWikiStringEntityReferenceSerializer.serialize(authenticatedUser));
         }
 
         if (configuration.isAuthoritative()) {
@@ -86,9 +91,9 @@ public class XWikiTrustedAuthenticator extends XWikiAuthServiceImpl
     public XWikiUser checkAuth(String username, String password, String rememberme, XWikiContext context)
         throws XWikiException
     {
-        String authenticatedUser = authenticator.authenticate();
+        DocumentReference authenticatedUser = authenticator.authenticate();
         if (authenticatedUser != null) {
-            return new XWikiUser(authenticatedUser);
+            return new XWikiUser(compactWikiStringEntityReferenceSerializer.serialize(authenticatedUser));
         }
 
         if (configuration.isAuthoritative()) {

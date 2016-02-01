@@ -77,7 +77,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     private DocumentReferenceResolver<String> defaultStringDocumentReferenceResolver;
 
     @Inject
-    private EntityReferenceSerializer<String> entityReferenceSerializer;
+    private EntityReferenceSerializer<String> defaultStringEntityReferenceSerializer;
 
     private TrustedAuthenticationAdapter authenticationAdapter;
 
@@ -96,19 +96,43 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     }
 
     @Override
-    public String authenticate()
+    public DocumentReference authenticate()
     {
         logger.debug("Starting trusted authentication...");
-        String previouslyAuthenticatedUser = persistenceStore.retrieve();
 
+        DocumentReference authenticatedUser = authenticate(persistenceStore.retrieve());
+
+        return authenticatedUser;
+    }
+
+    /**
+     * Proceed to the authentication, checking with the adapter if the previously authenticated user is not trusted,
+     * and creating and synchronizing user profile as needed.
+     *
+     * @param currentUser the currently authenticated user (serialized reference of his profile name).
+     * @return the authenticated user (document reference to the user profile).
+     */
+    private DocumentReference authenticate(String currentUser)
+    {
         if (configuration.isPersistenceStoreTrusted()) {
-            if (previouslyAuthenticatedUser != null) {
-                logger.debug("User [{}] authenticated from trusted persistence store.", previouslyAuthenticatedUser);
-                return previouslyAuthenticatedUser;
+            if (currentUser != null) {
+                logger.debug("User [{}] authenticated from trusted persistence store.", currentUser);
+                return defaultStringDocumentReferenceResolver.resolve(currentUser);
             }
         }
 
-        String userUid = authenticationAdapter.getUserUid();
+        return authenticate(currentUser, authenticationAdapter.getUserUid());
+    }
+
+    /**
+     * Proceed to the authentication, creating and synchronizing user profile as needed.
+     *
+     * @param previouslyAuthenticatedUser the previously authenticated user (serialized reference of his profile name).
+     * @param userUid the new user UID effectively connected.
+     * @return the authenticated user (document reference to the user profile).
+     */
+    private DocumentReference authenticate(String previouslyAuthenticatedUser, String userUid)
+    {
         if (userUid == null) {
             logger.debug("No user available from trusted authenticator.");
             if (previouslyAuthenticatedUser != null) {
@@ -118,30 +142,28 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
             logger.debug("Trusted authentication ended with public access.");
             return null;
         }
+        logger.debug("User [{}] retrieved from the authentication adapter.", userUid);
 
-        return authenticate(previouslyAuthenticatedUser, userUid);
+        return authenticate(previouslyAuthenticatedUser, getUserProfileReference(userUid));
     }
 
     /**
-     * Proceed to the authentication, creating and synchronizing user if needed based on the previous authentication.
+     * Proceed to the authentication, creating and synchronizing user profile as needed.
      *
-     * @param previouslyAuthenticatedUser the previously authenticated user retrieved from the store.
-     * @param currentUserUid the user Uid to be authenticated now.
-     * @return the finally authenticated user.
+     * @param previouslyAuthenticatedUser the previously authenticated user (serialized reference of his profile name).
+     * @param userProfile the reference of the profile of the user effectively connected (may need to be created).
+     * @return the authenticated user (document reference to the user profile).
      */
-    private String authenticate(String previouslyAuthenticatedUser, String currentUserUid)
+    private DocumentReference authenticate(String previouslyAuthenticatedUser, DocumentReference userProfile)
     {
-        logger.debug("User [{}] retrieved from the authentication adapter.", currentUserUid);
-
-        DocumentReference userProfile = getUserProfileReference(currentUserUid);
-        String authenticatedUser = entityReferenceSerializer.serialize(userProfile);
+        String authenticatedUser = defaultStringEntityReferenceSerializer.serialize(userProfile);
 
         if (previouslyAuthenticatedUser != null) {
             logger.debug("User [{}] retrieved from untrusted persistence store.", previouslyAuthenticatedUser);
             if (authenticatedUser.equals(previouslyAuthenticatedUser)) {
                 logger.debug("User [{}] authenticated from the authentication adapter, no synchronization.",
                     userProfile);
-                return authenticatedUser;
+                return userProfile;
             } else {
                 logger.debug("Authentication changed, clearing persistenceStore, removing [{}].",
                     previouslyAuthenticatedUser);
@@ -158,7 +180,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
         persistenceStore.store(authenticatedUser);
         logger.debug("User [{}] authenticated from the authentication adapter and saved to persistence store.",
             authenticatedUser);
-        return authenticatedUser;
+        return userProfile;
     }
 
     /**
