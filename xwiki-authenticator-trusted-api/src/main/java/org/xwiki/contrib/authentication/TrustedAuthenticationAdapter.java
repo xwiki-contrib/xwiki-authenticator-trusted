@@ -64,4 +64,18 @@ public interface TrustedAuthenticationAdapter
      * @return true if the user has been assign that role.
      */
     boolean isUserInRole(String role);
+
+    /**
+     * The location returned will be use to redirect the user during a logout action. It is expected that the
+     * user will redirected back to the provided location after having been logout from the external authentication
+     * system. If you do not want external logout, simply return null.
+     *
+     * @param location the location to redirect back after the external logout being done. This could be null and
+     *                 and should be handle as a test to know if a redirection will be available, so it should not
+     *                 throw, but return a non-null value to confirm redirection availability. This parameter will
+     *                 be like the one received by HttpServletResponse#sendRedirect().
+     * @return the location to redirect the user to for logout. This location will be passed
+     *         to HttpServletResponse#encodeRedirectUrl() before being given to HttpServletResponse#sendRedirect().
+     */
+    String getLogoutURL(String location);
 }
