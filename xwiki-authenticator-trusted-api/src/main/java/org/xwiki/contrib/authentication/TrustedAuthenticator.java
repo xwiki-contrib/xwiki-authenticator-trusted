@@ -21,6 +21,7 @@
 package org.xwiki.contrib.authentication;
 
 import org.xwiki.component.annotation.Role;
+import org.xwiki.model.reference.DocumentReference;
 
 /**
  * Trusted authenticator.
@@ -33,7 +34,7 @@ public interface TrustedAuthenticator
     /**
      * Authenticate a user based on external trusted authentication provided by a {@link TrustedAuthenticationAdapter}.
      *
-     * @return the document reference to the profile of the authenticated user.
+     * @return the authenticated user (document reference to the user profile).
      */
-    String authenticate();
+    DocumentReference authenticate();
 }

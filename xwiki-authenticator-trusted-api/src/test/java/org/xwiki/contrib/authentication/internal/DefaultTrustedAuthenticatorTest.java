@@ -138,7 +138,7 @@ public class DefaultTrustedAuthenticatorTest
         when(store.retrieve()).thenReturn(TEST_USER_FN);
         when(authConfig.isPersistenceStoreTrusted()).thenReturn(true);
 
-        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
+        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_REF));
     }
 
     @Test
@@ -173,7 +173,7 @@ public class DefaultTrustedAuthenticatorTest
         when(store.retrieve()).thenReturn(TEST_USER_FN);
         when(authAdapter.getUserUid()).thenReturn(TEST_USER);
         when(authAdapter.getUserName()).thenReturn(TEST_USER);
-        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
+        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_REF));
         verify(store, never()).clear();
         verify(store, never()).store(any(String.class));
     }
@@ -206,7 +206,7 @@ public class DefaultTrustedAuthenticatorTest
         when(authAdapter.getUserUid()).thenReturn(TEST_USER);
         when(authAdapter.getUserName()).thenReturn(TEST_USER);
         when(userManager.createUser(TEST_USER_REF, new HashMap<String, String>())).thenReturn(true);
-        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
+        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_REF));
         verify(store, times(1)).clear();
         verify(store, times(1)).store(TEST_USER_FN);
     }
@@ -217,7 +217,7 @@ public class DefaultTrustedAuthenticatorTest
         when(authAdapter.getUserUid()).thenReturn(TEST_USER);
         when(authAdapter.getUserName()).thenReturn(TEST_USER);
         when(userManager.createUser(TEST_USER_REF, new HashMap<String, String>())).thenReturn(true);
-        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
+        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_REF));
         verify(store, never()).clear();
         verify(store, times(1)).store(TEST_USER_FN);
     }
@@ -228,7 +228,7 @@ public class DefaultTrustedAuthenticatorTest
         when(authAdapter.getUserUid()).thenReturn(TEST_USER);
         when(authAdapter.getUserName()).thenReturn(TEST_USER);
         when(xwikimock.exists(TEST_USER_REF, context)).thenReturn(true);
-        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
+        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_REF));
         verify(store, never()).clear();
         verify(userManager, never()).synchronizeUserProperties(any(DocumentReference.class), any(Map.class), any(String.class));
         verify(store, times(1)).store(TEST_USER_FN);
@@ -256,7 +256,7 @@ public class DefaultTrustedAuthenticatorTest
     {
         Map<String, String> authInfo = getAuthInfo();
         Map<String, String> extInfo = new HashMap<>();
-        for(Map.Entry<String, String> entry : getUserPropertyMapping().entrySet()) {
+        for (Map.Entry<String, String> entry : getUserPropertyMapping().entrySet()) {
             extInfo.put(entry.getKey(), authInfo.get(entry.getValue()));
         }
         return extInfo;
@@ -265,7 +265,7 @@ public class DefaultTrustedAuthenticatorTest
     @Test
     public void testExistingUserAuthenticationWithUserPropertyMapping() throws Exception
     {
-        Map<String,String> userPropertyMapping = getUserPropertyMapping();
+        Map<String, String> userPropertyMapping = getUserPropertyMapping();
 
         when(authConfig.getUserPropertyMappings()).thenReturn(userPropertyMapping);
         when(authAdapter.getUserUid()).thenReturn(TEST_USER);
@@ -281,7 +281,7 @@ public class DefaultTrustedAuthenticatorTest
             }
         );
         when(xwikimock.exists(TEST_USER_REF, context)).thenReturn(true);
-        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
+        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_REF));
         verify(store, never()).clear();
         verify(userManager, times(1)).synchronizeUserProperties(eq(TEST_USER_REF), eq(getExtendedInfo()), any(String.class));
         verify(store, times(1)).store(TEST_USER_FN);
@@ -305,7 +305,7 @@ public class DefaultTrustedAuthenticatorTest
         when(authAdapter.getUserName()).thenReturn(TEST_USER);
         when(authAdapter.isUserInRole("groupc")).thenReturn(true);
         when(xwikimock.exists(TEST_USER_REF, context)).thenReturn(true);
-        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_FN));
+        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_REF));
         verify(store, never()).clear();
         verify(userManager, times(1)).synchronizeGroupsMembership(eq(TEST_USER_REF),
             (Collection<DocumentReference>) argThat(containsInAnyOrder(
@@ -318,7 +318,7 @@ public class DefaultTrustedAuthenticatorTest
         verify(store, times(1)).store(TEST_USER_FN);
     }
 
-    @Test(expected=UnsupportedOperationException.class)
+    @Test(expected = UnsupportedOperationException.class)
     public void testUnsupportedUsernameUidDiff() throws Exception
     {
         when(authAdapter.getUserUid()).thenReturn("userid");

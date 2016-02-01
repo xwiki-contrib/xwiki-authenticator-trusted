@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.xwiki.model.internal.DefaultModelConfiguration;
 import org.xwiki.model.internal.DefaultModelContext;
 import org.xwiki.model.internal.reference.DefaultEntityReferenceValueProvider;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.LogRule;
 import org.xwiki.test.annotation.ComponentList;
 
@@ -74,6 +75,7 @@ public class XWikiTrustedAuthenticatorTest
     private static final String TEST_REMEMBERME = "yes";
     private static final String VALID_TEST_USER = "test=user_example=com";
     private static final String TEST_USER_FN = USER_WIKI + ':' + USER_SPACE + '.' + VALID_TEST_USER;
+    private static final DocumentReference TEST_USER_REF = new DocumentReference(USER_WIKI, USER_SPACE, VALID_TEST_USER);
 
     @Rule
     public MockitoOldcoreRule oldcore = new MockitoOldcoreRule();
@@ -114,11 +116,11 @@ public class XWikiTrustedAuthenticatorTest
     @Test
     public void testSuccessfullTrustedAuthentication() throws XWikiException
     {
-        when(trustedAuthenticator.authenticate()).thenReturn(TEST_USER_FN);
+        when(trustedAuthenticator.authenticate()).thenReturn(TEST_USER_REF);
         assertThat(oldcore.getMockXWiki().getAuthService().checkAuth(oldcore.getXWikiContext()),
             equalTo(new XWikiUser(TEST_USER_FN)));
 
-        when(trustedAuthenticator.authenticate()).thenReturn(TEST_USER_FN);
+        when(trustedAuthenticator.authenticate()).thenReturn(TEST_USER_REF);
         assertThat(oldcore.getMockXWiki().getAuthService()
             .checkAuth(TEST_USER, TEST_PASSWORD, TEST_REMEMBERME, oldcore.getXWikiContext()),
             equalTo(new XWikiUser(TEST_USER_FN)));
