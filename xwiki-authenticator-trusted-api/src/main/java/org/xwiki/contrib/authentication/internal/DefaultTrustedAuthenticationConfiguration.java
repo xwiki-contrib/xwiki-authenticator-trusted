@@ -20,6 +20,7 @@
 
 package org.xwiki.contrib.authentication.internal;
 
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -34,6 +35,7 @@ import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.contrib.authentication.AuthenticationPersistenceStore;
 import org.xwiki.contrib.authentication.TrustedAuthenticationAdapter;
 
+import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.user.api.XWikiAuthService;
 
 /**
@@ -76,6 +78,8 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
 
     private static final String PROPERTY_MAPPING_PROPERTY = "propertiesMapping";
     private static final char PROPERTY_MAPPING_SEP = '|';
+
+    private static final String LOGOUTPAGE_CONFIG_KEY = "xwiki.authentication.logoutpage";
 
     @Inject
     private ComponentManager componentManager;
@@ -188,5 +192,32 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
         }
 
         return authenticator;
+    }
+
+    @Override
+    public String getLogoutPagePattern()
+    {
+        XWikiContext context = contextProvider.get();
+        String logoutPage = null;
+
+        try {
+            logoutPage = context.getWiki().Param(LOGOUTPAGE_CONFIG_KEY);
+        } catch (Exception e) {
+            logger.error("Failed to get logout page config [{}]", LOGOUTPAGE_CONFIG_KEY, e);
+        }
+
+        if (logoutPage == null) {
+            logoutPage = stripContextPathFromURL(
+                context.getURLFactory().createURL("XWiki", "XWikiLogout", "logout", context));
+        }
+
+        return logoutPage;
+    }
+
+    private String stripContextPathFromURL(URL url)
+    {
+        XWikiContext context = contextProvider.get();
+        return StringUtils.removeStart(url.toExternalForm(),
+            url.getProtocol() + "://" + url.getAuthority() + context.getWiki().getWebAppPath(context));
     }
 }

@@ -20,6 +20,8 @@
 
 package org.xwiki.contrib.authentication;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -53,11 +55,14 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
     private static final String CONFIG_SECRET_VALUE = "secret_value";
     private static final String CONFIG_GROUP_FIELD = "group_field";
     private static final String CONFIG_GROUP_VALUE_SEPARATOR = "group_value_separator";
+    private static final String CONFIG_LOGOUT_URL = "logout_url";
 
     // Default values for configuration
     private static final String DEFAULT_AUTH_FIELD = "remote_user";
     private static final String DEFAULT_ID_FIELD = DEFAULT_AUTH_FIELD;
     private static final String DEFAULT_GROUP_VALUE_SEPARATOR = "\\|";
+
+    private static final String LOGOUT_URL_REDIRECTION_PLACEHOLDER = "__REDIRECT__";
 
     @Inject
     private Logger logger;
@@ -137,5 +142,30 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
 
         return Arrays.asList(headerValue.split(configuration.getCustomProperty(CONFIG_GROUP_VALUE_SEPARATOR,
             DEFAULT_GROUP_VALUE_SEPARATOR)));
+    }
+
+    @Override
+    public String getLogoutURL(String location)
+    {
+        String logoutUrl = configuration.getCustomProperty(CONFIG_LOGOUT_URL, null);
+
+        if (StringUtils.isBlank(logoutUrl)) {
+            return null;
+        }
+
+        if (location != null) {
+            logoutUrl = logoutUrl.replace(LOGOUT_URL_REDIRECTION_PLACEHOLDER, urlEncode(location));
+        }
+
+        return logoutUrl;
+    }
+
+    private String urlEncode(String text) {
+        try {
+            return URLEncoder.encode(text, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // Very unlikely to happen
+            return text;
+        }
     }
 }

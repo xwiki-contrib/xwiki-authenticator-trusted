@@ -107,6 +107,8 @@ public class DefaultTrustedAuthenticationConfigurationTest
     private static final String GROUP_MAPPING_PROPERTY = "groupsMapping";
     private static final String PROPERTY_MAPPING_PROPERTY = "propertiesMapping";
 
+    private static final String LOGOUTPAGE_CONFIG_KEY = "xwiki.authentication.logoutpage";
+    private static final String LOGOUTPAGE_PATTERN = "(/|/[^/]+/|/wiki/[^/]+/)logout/*";
 
     @Rule
     public MockitoOldcoreRule oldcore = new MockitoOldcoreRule();
@@ -325,6 +327,13 @@ public class DefaultTrustedAuthenticationConfigurationTest
     {
         config.put(CONF_PREFIX + FALLBACK_AUTH_PROPERTY, GroovyAuthServiceImpl.class.getCanonicalName());
         assertThat(configuration.getFallbackAuthenticator(), instanceOf(GroovyAuthServiceImpl.class));
+    }
+
+    @Test
+    public void testGetLogoutPagePattern() throws Exception
+    {
+        config.put(LOGOUTPAGE_CONFIG_KEY, LOGOUTPAGE_PATTERN);
+        assertThat(configuration.getLogoutPagePattern(), equalTo(LOGOUTPAGE_PATTERN));
     }
 
 }

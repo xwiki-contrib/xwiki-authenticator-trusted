@@ -20,6 +20,8 @@
 
 package org.xwiki.contrib.authentication.internal;
 
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,6 +33,7 @@ import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.xwiki.component.util.DefaultParameterizedType;
@@ -54,6 +57,8 @@ import org.xwiki.test.mockito.MockitoComponentMockingRule;
 
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.web.XWikiRequest;
+import com.xpn.xwiki.web.XWikiResponse;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -326,4 +331,65 @@ public class DefaultTrustedAuthenticatorTest
         mocker.getComponentUnderTest().authenticate();
     }
 
+    @Test
+    public void testLogout() throws Exception
+    {
+        final String serverUrlStr = "http://www.example.com";
+        final String redirectPath = "/bin/view/Main/";
+        final String rewrittenUrl = "http://www.other.com/?redir=" + URLEncoder
+            .encode(serverUrlStr + redirectPath, "UTF-8");
+        URL serverUrl = new URL(serverUrlStr);
+        when(context.getURL()).thenReturn(serverUrl);
+
+        when(xwikimock.Param(any(String.class),any(String.class))).then(new Answer<String>()
+        {
+            @Override
+            public String answer(InvocationOnMock invocationOnMock) throws Throwable
+            {
+                return (String) invocationOnMock.getArguments()[1];
+            }
+        });
+
+        XWikiRequest request = mock(XWikiRequest.class);
+        when(request.getScheme()).thenReturn("http");
+        when(request.getServletPath()).thenReturn("/bin");
+        when(request.getPathInfo()).thenReturn("/logout/Main/");
+        when(context.getRequest()).thenReturn(request);
+
+        XWikiResponse response = mock(XWikiResponse.class);
+        when(response.encodeRedirectURL(rewrittenUrl)).thenReturn(rewrittenUrl);
+        when(context.getResponse()).thenReturn(response);
+
+        when(store.retrieve()).thenReturn(TEST_USER_FN);
+        when(authAdapter.getUserUid()).thenReturn(TEST_USER);
+        when(authAdapter.getUserName()).thenReturn(TEST_USER);
+        when(authConfig.getLogoutPagePattern()).thenReturn("(/|/[^/]+/|/wiki/[^/]+/)logout/*");
+
+        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_REF));
+        verify(context, never()).setResponse(any(RedirectionRewritingResponseWrapper.class));
+
+        ArgumentCaptor<RedirectionRewritingResponseWrapper> wrapperCaptor =
+            ArgumentCaptor.forClass(RedirectionRewritingResponseWrapper.class);
+
+        when(authAdapter.getLogoutURL(any(String.class))).then(new Answer<String>()
+            {
+                @Override
+                public String answer(InvocationOnMock invocationOnMock)
+                   throws Throwable
+                {
+                    if ((serverUrlStr + redirectPath).equals(invocationOnMock.getArguments()[0])) {
+                        return rewrittenUrl;
+                    }
+                    return "";
+                }
+            }
+        );
+        assertThat(mocker.getComponentUnderTest().authenticate(), equalTo(TEST_USER_REF));
+        verify(context, times(1)).setResponse(wrapperCaptor.capture());
+
+        wrapperCaptor.getValue().sendRedirect(redirectPath);
+        verify(authAdapter, times(2)).getLogoutURL(null);
+        verify(authAdapter, times(1)).getLogoutURL(serverUrlStr + redirectPath);
+        verify(response, times(1)).sendRedirect(rewrittenUrl);
+    }
 }

@@ -88,6 +88,11 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
      */
     private Map<DocumentReference, Collection<String>> groupMappings;
 
+    /**
+     * Cache of the logout pattern matcher.
+     */
+    private RequestMatcher logoutMatcher;
+
     @Override
     public void initialize() throws InitializationException
     {
@@ -101,6 +106,11 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
         logger.debug("Starting trusted authentication...");
 
         DocumentReference authenticatedUser = authenticate(persistenceStore.retrieve());
+
+        if (isLogoutRequest()) {
+            wrapResponseForLogoutRediction();
+            persistenceStore.clear();
+        }
 
         return authenticatedUser;
     }
@@ -350,5 +360,38 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
         }
 
         return this.groupMappings;
+    }
+
+    /**
+     * If the authenticator adapter provides a global logout URL, wrap the current response in order to rewrite
+     * redirection URL using that external logout, which will be responsible to latter redirect back to the
+     * original location requested. The redirection is not done now because we need to pass through the normal
+     * XWiki logout process first.
+     */
+    private void wrapResponseForLogoutRediction()
+    {
+        XWikiContext context = contextProvider.get();
+        if (authenticationAdapter.getLogoutURL(null) != null) {
+            logger.debug("Wrapping the response for external logout redirection.");
+            context.setResponse(new RedirectionRewritingResponseWrapper(
+                new RedirectionRewritingResponseWrapper.URLRewriter() {
+                    @Override
+                    public String rewrite(String location)
+                    {
+                        return authenticationAdapter.getLogoutURL(location);
+                    }
+                }, context));
+        }
+    }
+
+    /**
+     * @return true if the current request match the configured logout page pattern.
+     */
+    private boolean isLogoutRequest() {
+        if (logoutMatcher == null) {
+            logoutMatcher = new RequestMatcher(configuration.getLogoutPagePattern());
+        }
+
+        return logoutMatcher.match(contextProvider.get().getRequest());
     }
 }

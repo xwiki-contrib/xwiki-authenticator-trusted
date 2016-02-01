@@ -110,6 +110,11 @@ public interface TrustedAuthenticationConfiguration
     XWikiAuthService getFallbackAuthenticator();
 
     /**
+     * @return the expression to be used to match the XWiki logout page during authentication
+     */
+    String getLogoutPagePattern();
+
+    /**
      * Retrieve value of a simple property.
      * Example: <code>name = value</code>
      *
