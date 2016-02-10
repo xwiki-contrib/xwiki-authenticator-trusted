@@ -119,17 +119,26 @@ public class CookieAuthenticationPersistenceStore implements AuthenticationPersi
     @Override
     public void clear()
     {
-        XWikiContext context = contextProvider.get();
-        context.getResponse().removeCookie(cookiePfx + AUTHENTICATION_COOKIE, context.getRequest());
+        setAuthenticationCookie(null, 0);
     }
 
     @Override
     public void store(String userUid)
     {
+        setAuthenticationCookie(encryptText(userUid), cookieMaxAge);
+    }
+
+    /**
+     * Set the authentication cookie to the given value and max age.
+     * @param value the value to be set.
+     * @param maxAge the maximum age of the cookie.
+     */
+    private void setAuthenticationCookie(String value, int maxAge)
+    {
         XWikiContext context = contextProvider.get();
 
-        Cookie cookie = new Cookie(cookiePfx + AUTHENTICATION_COOKIE, encryptText(userUid));
-        cookie.setMaxAge(cookieMaxAge);
+        Cookie cookie = new Cookie(cookiePfx + AUTHENTICATION_COOKIE, value);
+        cookie.setMaxAge(maxAge);
         cookie.setPath(cookiePath);
         String cookieDomain = getCookieDomain();
         if (cookieDomain != null) {
@@ -144,9 +153,25 @@ public class CookieAuthenticationPersistenceStore implements AuthenticationPersi
     @Override
     public String retrieve()
     {
-        String cookie = getCookieValue(cookiePfx + AUTHENTICATION_COOKIE);
+        String cookie = getAuthenticationCookieValue();
         if (cookie != null) {
             return decryptText(cookie);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve the encrypted authentication cookie value.
+     * @return the encrypted value found in the cookie if any, null otherwise.
+     */
+    private String getAuthenticationCookieValue()
+    {
+        XWikiRequest request = contextProvider.get().getRequest();
+        if (request != null) {
+            Cookie cookie = request.getCookie(cookiePfx + AUTHENTICATION_COOKIE);
+            if (cookie != null) {
+                return cookie.getValue();
+            }
         }
         return null;
     }
@@ -183,23 +208,6 @@ public class CookieAuthenticationPersistenceStore implements AuthenticationPersi
                 Base64.decodeBase64(text.replaceAll(UNDERSCORE, EQUAL_SIGN).getBytes("ISO-8859-1"))));
         } catch (Exception e) {
             logger.error("Failed to decrypt text", e);
-        }
-        return null;
-    }
-
-    /**
-     * Retrieve given cookie null-safe.
-     * @param cookieName name of the cookie
-     * @return the cookie
-     */
-    private String getCookieValue(String cookieName)
-    {
-        XWikiRequest request = contextProvider.get().getRequest();
-        if (request != null) {
-            Cookie cookie = request.getCookie(cookieName);
-            if (cookie != null) {
-                return cookie.getValue();
-            }
         }
         return null;
     }
