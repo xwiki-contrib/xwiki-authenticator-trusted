@@ -135,7 +135,10 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     }
 
     /**
-     * Proceed to the authentication, creating and synchronizing user profile as needed.
+     * Proceed to the authentication. When the adapter return a null UID, if the persistent store is trusted on missing
+     * authentication the persisted user is used straight, else the persistence store is cleared and public access is
+     * returned. When the adapter provide a valid user UID, this one is used, and the user and groups are synchronized`
+     * only if it differ from the user available in the persistent store.
      *
      * @param previouslyAuthenticatedUser the previously authenticated user (serialized reference of his profile name).
      * @param userUid the new user UID effectively connected.
@@ -146,8 +149,14 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
         if (userUid == null) {
             logger.debug("No user available from trusted authenticator.");
             if (previouslyAuthenticatedUser != null) {
-                logger.debug("Clearing persistenceStore, removing [{}].", previouslyAuthenticatedUser);
-                persistenceStore.clear();
+                if (configuration.isPersistenceStoreTrustedOnMissingAuthentication()) {
+                    logger.debug("User [{}] authenticated from 'trusted on missing authentication' persistence store .",
+                        previouslyAuthenticatedUser);
+                    return defaultStringDocumentReferenceResolver.resolve(previouslyAuthenticatedUser);
+                } else {
+                    logger.debug("Clearing persistenceStore, removing [{}].", previouslyAuthenticatedUser);
+                    persistenceStore.clear();
+                }
             }
             logger.debug("Trusted authentication ended with public access.");
             return null;

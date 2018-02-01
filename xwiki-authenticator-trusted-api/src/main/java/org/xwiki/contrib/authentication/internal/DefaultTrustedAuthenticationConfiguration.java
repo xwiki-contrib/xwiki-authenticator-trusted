@@ -59,6 +59,10 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
     private static final String PERSISTANCE_STORE_TRUSTED_PROPERTY = "isPersistenceStoreTrusted";
     private static final boolean PERSISTANCE_STORE_TRUSTED_DEFAULT = false;
 
+    private static final String PERSISTANCE_STORE_TRUSTED_ON_MISSING_AUTH_PROPERTY =
+        "isPersistenceStoreTrustedOnMissingAuthentication";
+    private static final boolean PERSISTANCE_STORE_TRUSTED_ON_MISSING_AUTH_DEFAULT = false;
+
     private static final String PERSISTANCE_STORE_TTL_PROPERTY = "persistenceStoreTTL";
     private static final int    PERSISTANCE_STORE_TTL_DEFAULT = -1;
 
@@ -122,6 +126,13 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
     public boolean isPersistenceStoreTrusted()
     {
         return getCustomPropertyAsBoolean(PERSISTANCE_STORE_TRUSTED_PROPERTY, PERSISTANCE_STORE_TRUSTED_DEFAULT);
+    }
+
+    @Override
+    public boolean isPersistenceStoreTrustedOnMissingAuthentication()
+    {
+        return getCustomPropertyAsBoolean(PERSISTANCE_STORE_TRUSTED_ON_MISSING_AUTH_PROPERTY,
+            PERSISTANCE_STORE_TRUSTED_ON_MISSING_AUTH_DEFAULT);
     }
 
     @Override

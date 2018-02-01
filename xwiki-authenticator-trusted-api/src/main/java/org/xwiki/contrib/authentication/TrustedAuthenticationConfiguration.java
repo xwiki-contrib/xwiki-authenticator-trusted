@@ -70,6 +70,13 @@ public interface TrustedAuthenticationConfiguration
     boolean isPersistenceStoreTrusted();
 
     /**
+     * @return true when a not trusted persistence store should still be trusted when the adapter does not provide
+     * an authenticated user (null user identifier received).
+     *
+     */
+    boolean isPersistenceStoreTrustedOnMissingAuthentication();
+
+    /**
      * TTL of the persistence storage, currently only applicable to COOKIE* modes.
      * @return how long in seconds persistence should be considered valid before being drop since initial setup.
      */
