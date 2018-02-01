@@ -17,7 +17,9 @@ The general behavior of the trusted authentication is:
 
   * If persistent store is trusted and not null, return the already authenticated user
   * `getUserId()` from the adapter:
-    * if user is null, return with public access
+    * if user is null,
+      * if persistent store is trusted on missing authentication and not null, return the already authenticated user
+      * else clear the persistent store and return with public access
     * else compute the user profile reference from `getUserName()`, replacing `.` by `=` and `@` by `_`
       * if user is found in persistence store, return that authenticated user
       * else, check user for existance:
@@ -51,9 +53,17 @@ meaningful value that may have duplicates, without causing confusions.
     # xwiki.authentication.trusted.persistenceStoreHint=session
 
     #-# By default the persistence store is not trusted, but only used to optimize the synchronization process.
-    #-# If the authentication process is time consuming, you may improve performance by trusting the authentication
-    #-# provided by the persistence store without requesting the external authentication, simply uncomment: 
+    #-# If the authentication process is time consuming, you may improve performance by trusting the authentication 
+    #-# provided by the persistence store and prevent requesting the external authentication with every request, 
+    #-# simply uncomment: 
     # xwiki.authentication.trusted.isPersistenceStoreTrusted=true;
+    
+    #-# If the authentication process is not time consuming, but authetication is not provided with every request, 
+    #-# you may also keep the above setting commented, but you may want to trust the authentication provided by 
+    #-# the persistence store when a request is made without authentication, allowing some persistence but still
+    #-# giving the priority to the external authentication when provided. This allow a smoother experience especially
+    #-# when user switching occurs in the same browser, simply uncomment: 
+    # xwiki.authentication.trusted.isPersistenceStoreTrustedOnMissingAuthentication=true;
    
     #-# Only used with the Cookie persistence store, allow setting the cookie Time To Live in seconde to keep 
     #-# persistence between browser restart. The default is to use a session cookie.
@@ -138,6 +148,9 @@ This authenticator has the following specific behavior:
  * getUserProperty(): returns the value of the http header having the given name
  * isUserInRole(): return true if the splitted array of the `group_field` http header by the `group_value_separator`
    contains the given name
+ * getLogoutUrl(location): if a logout URL is configured, provide it during a logout triggered from XWiki as the
+   redirection page, so that the logout is propagated to the SSO provider. A placeholder `__REDIRECT__` in the url is 
+   replace by the location provided to this method.
 
 ### Specific configuration
 
@@ -173,6 +186,14 @@ This authenticator has the following specific behavior:
     #-# A separator used to split the list of groups into group names.
     #-# Default to the pipe character.
     # xwiki.authentication.trusted.group_value_separator=|
+
+    #-# URL to the logout page of the external system that provide the authentication. This URL is used to propagate
+    #-# the usage of the logout feature in XWiki to the external system. XWiki may provide a redirect back location
+    #-# for the external system. It will be inserted as a replacement of the __REDIRECT__ placeholder if available
+    #-# in the configured URL.
+    #-# Default to null, so logout is not propagated, which prevent logout to work from XWiki.
+    # xwiki.authentication.trusted.logout_url=http://sso.example.com/logout/page?redirect=__REDIRECT__
+
 
 ## Install
 
