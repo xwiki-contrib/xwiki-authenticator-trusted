@@ -22,6 +22,7 @@ package org.xwiki.contrib.authentication;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -56,6 +57,7 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
     private static final String CONFIG_GROUP_FIELD = "group_field";
     private static final String CONFIG_GROUP_VALUE_SEPARATOR = "group_value_separator";
     private static final String CONFIG_LOGOUT_URL = "logout_url";
+    private static final String CONFIG_HEADER_ENCODING = "header_encoding";
 
     // Default values for configuration
     private static final String DEFAULT_AUTH_FIELD = "remote_user";
@@ -126,7 +128,23 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
         if (request == null) {
             return null;
         }
-        return request.getHeader(name);
+
+        String value = request.getHeader(name);
+
+        if (StringUtils.isNotBlank(value)) {
+            String encoding = configuration.getCustomProperty(CONFIG_HEADER_ENCODING, null);
+            if (StringUtils.isNotBlank(encoding) && Charset.isSupported(encoding)) {
+                try {
+                    value = new String(value.getBytes("ISO-8859-1"), encoding);
+                } catch (UnsupportedEncodingException e) {
+                    logger.debug("Failed to decode header [{}] using charset [{}].", name, encoding, e);
+                }
+            } else {
+                logger.debug("Unsupported charset [{}] requested for decoding headers.", encoding);
+            }
+        }
+
+        return value;
     }
 
     private List<String> getGroupFieldHeaderValue()

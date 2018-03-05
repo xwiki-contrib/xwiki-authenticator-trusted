@@ -193,6 +193,12 @@ This authenticator has the following specific behavior:
     #-# in the configured URL.
     #-# Default to null, so logout is not propagated, which prevent logout to work from XWiki.
     # xwiki.authentication.trusted.logout_url=http://sso.example.com/logout/page?redirect=__REDIRECT__
+    
+    #-# According to RFC2616, HTTP Headers are following RFC822 header syntaxt and does not support natively any
+    #-# character encoding, making US-ASCII prevails. Some advanced usage is still possible by convention between
+    #-# the parties. The following configuration allow supporting headers encoded in any Charset available to the
+    #-# JVM. For example, uncomment the following line to support UTF-8 encoded headers: 
+    # xwiki.authentication.trusted.header_encoding=UTF-8
 
 
 ## Install
