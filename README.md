@@ -20,7 +20,7 @@ The general behavior of the trusted authentication is:
     * if user is null,
       * if persistent store is trusted on missing authentication and not null, return the already authenticated user
       * else clear the persistent store and return with public access
-    * else compute the user profile reference from `getUserName()`, replacing `.` by `=` and `@` by `_`
+    * else compute the user profile reference from `getUserName()`, replacing some characters based on the `xwiki.authentication.trusted.userProfileReplacements` configuration and applying character case changes based on `xwiki.authentication.trusted.userProfileCase`
       * if user is found in persistence store, return that authenticated user
       * else, check user for existance:
         * if the user exists, synchronize user properties and group membership
