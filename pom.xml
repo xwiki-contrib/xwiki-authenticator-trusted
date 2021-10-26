@@ -34,6 +34,8 @@
   <description>Parent project for trusted authenticators</description>
   <properties>
     <platform.version>${commons.version}</platform.version>
+    <!-- XWiki supports only one authenticator for the same instance -->
+    <xwiki.extension.namespaces>{root}</xwiki.extension.namespaces>
   </properties>
   <packaging>pom</packaging>
   <modules>
