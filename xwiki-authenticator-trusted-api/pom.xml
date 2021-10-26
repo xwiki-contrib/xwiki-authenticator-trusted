@@ -30,6 +30,10 @@
   <name>Trusted authentication framework</name>
   <version>1.4-SNAPSHOT</version>
   <description>A generic XWiki authentication service based on pluggable adapters to provide trusted authentication from external sources</description>
+  <properties>
+    <!-- XWiki supports only one authenticator for the same instance -->
+    <xwiki.extension.namespaces>{root}</xwiki.extension.namespaces>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.xwiki.platform</groupId>
