@@ -3,3 +3,4 @@ org.xwiki.contrib.authentication.internal.DefaultTrustedAuthenticationConfigurat
 org.xwiki.contrib.authentication.internal.DefaultTrustedAuthenticator
 org.xwiki.contrib.authentication.internal.DefaultUserManager
 org.xwiki.contrib.authentication.internal.SessionAuthenticationPersistenceStore
+org.xwiki.contrib.authentication.internal.XWikiTrustedAuthService
