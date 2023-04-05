@@ -41,7 +41,7 @@ public class XWikiTrustedAuthService extends AbstractXWikiAuthServiceWrapper imp
     /**
      * The identifier of the authenticator.
      */
-    public static final String ID = "ldap";
+    public static final String ID = "trustedframework";
 
     /**
      * Wrap a {@link XWikiTrustedAuthenticator} instance.
