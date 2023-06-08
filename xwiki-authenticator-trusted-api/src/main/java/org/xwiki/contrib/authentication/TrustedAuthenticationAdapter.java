@@ -20,6 +20,8 @@
 
 package org.xwiki.contrib.authentication;
 
+import java.util.Collection;
+
 import org.xwiki.component.annotation.Role;
 
 /**
@@ -64,6 +66,16 @@ public interface TrustedAuthenticationAdapter
      * @return true if the user has been assign that role.
      */
     boolean isUserInRole(String role);
+
+
+    /**
+     * @return the roles the user is part of.
+     * @since 1.5.2
+     */
+    default Collection<String> getUserRoles()
+    {
+        return null;
+    }
 
     /**
      * The location returned will be use to redirect the user during a logout action. It is expected that the

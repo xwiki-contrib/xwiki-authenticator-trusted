@@ -20,6 +20,7 @@
 
 package org.xwiki.contrib.authentication;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -64,6 +65,28 @@ public interface UserManager
      */
     boolean synchronizeGroupsMembership(DocumentReference user, Collection<DocumentReference> groupInRefs,
         Collection<DocumentReference> groupOutRefs, String comment);
+
+    /**
+     * Synchronize user membership to groups.
+     *
+     * @param user the reference of the user.
+     * @param groupInRefs the reference of the groups the user should be in.
+     * @param groupWithAutoCreateInRefs the reference of the groups the user should be in and that can
+     *                                  be created if missing.
+     * @param groupOutRefs the reference of the groups the user should not be in.
+     * @param comment the comment used for saving modification to groups.
+     * @return true when the user has been successfully synchronized.
+     * @since 1.5.2
+     */
+    default boolean synchronizeGroupsMembership(DocumentReference user, Collection<DocumentReference> groupInRefs,
+        Collection<DocumentReference> groupWithAutoCreateInRefs, Collection<DocumentReference> groupOutRefs,
+        String comment)
+    {
+        Collection<DocumentReference> groupsIn = new ArrayList<DocumentReference>();
+        groupsIn.addAll(groupInRefs);
+        groupsIn.addAll(groupWithAutoCreateInRefs);
+        return synchronizeGroupsMembership(user, groupsIn, groupOutRefs, comment);
+    }
 
     /**
      * Remove user from group.

@@ -21,6 +21,7 @@
 package org.xwiki.contrib.authentication;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -193,4 +194,18 @@ public interface TrustedAuthenticationConfiguration
      */
     Map<String, Collection<String>> getCustomPropertyAsMapOfSet(String name, char separator,
         Map<String, Collection<String>> def, boolean left);
+
+    /**
+     * @return the dynamic role configurations. Empty if no configuration is provided,
+     *         null if some issue happened while parsing the configurations. In
+     *         the later case, authentication should be blocked for any user.
+     */
+    default Collection<DynamicRoleConfiguration> getDynamicRoleConfigurations()
+    {
+        // Implementations that don't provide this method don't support dynamic
+        // role configurations. An empty list will match the old behavior, when
+        // these configurations were not supported.
+        return Collections.emptyList();
+    }
+
 }
