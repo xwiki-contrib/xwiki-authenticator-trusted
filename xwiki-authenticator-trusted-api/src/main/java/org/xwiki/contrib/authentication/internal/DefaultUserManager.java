@@ -21,6 +21,7 @@
 package org.xwiki.contrib.authentication.internal;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -138,10 +139,20 @@ public class DefaultUserManager implements UserManager
     public boolean synchronizeGroupsMembership(DocumentReference user, Collection<DocumentReference> groupInRefs,
         Collection<DocumentReference> groupOutRefs, String comment)
     {
+        return synchronizeGroupsMembership(user, groupInRefs,
+            Collections.<DocumentReference> emptyList(), groupOutRefs, comment);
+    }
+
+    @Override
+    public boolean synchronizeGroupsMembership(DocumentReference user, Collection<DocumentReference> groupInRefs,
+        Collection<DocumentReference> groupWithAutoCreateInRefs, Collection<DocumentReference> groupOutRefs,
+        String comment)
+    {
         XWikiContext context = contextProvider.get();
 
-        logger.debug("XWiki groups the user should be a member: {}", groupInRefs);
-        logger.debug("XWiki groups the user should not be a member: {}", groupOutRefs);
+        logger.debug("XWiki groups the user should be a member of: {}", groupInRefs);
+        logger.debug("Auto-created XWiki groups the user should be a member of: {}", groupWithAutoCreateInRefs);
+        logger.debug("XWiki groups the user should not be a member of: {}", groupOutRefs);
 
         Collection<DocumentReference> xwikiUserGroupList;
         try {
@@ -159,6 +170,12 @@ public class DefaultUserManager implements UserManager
         for (DocumentReference groupRef : groupInRefs) {
             if (!xwikiUserGroupList.contains(groupRef)) {
                 success &= addToGroup(user, groupRef, comment, false);
+            }
+        }
+
+        for (DocumentReference groupRef : groupWithAutoCreateInRefs) {
+            if (!xwikiUserGroupList.contains(groupRef)) {
+                success &= addToGroup(user, groupRef, comment, true);
             }
         }
 

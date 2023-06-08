@@ -111,7 +111,7 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
     @Override
     public boolean isUserInRole(String role)
     {
-        return getGroupFieldHeaderValue().contains(role);
+        return getUserRoles().contains(role);
     }
 
     /**
@@ -147,7 +147,8 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
         return value;
     }
 
-    private List<String> getGroupFieldHeaderValue()
+    @Override
+    public List<String> getUserRoles()
     {
         String groupFieldName = configuration.getCustomProperty(CONFIG_GROUP_FIELD, null);
         String headerValue = null;

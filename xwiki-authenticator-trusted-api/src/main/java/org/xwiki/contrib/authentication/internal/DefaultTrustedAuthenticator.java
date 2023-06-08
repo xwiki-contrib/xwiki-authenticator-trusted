@@ -23,9 +23,11 @@ package org.xwiki.contrib.authentication.internal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
@@ -35,6 +37,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.contrib.authentication.AuthenticationPersistenceStore;
+import org.xwiki.contrib.authentication.DynamicRoleConfiguration;
 import org.xwiki.contrib.authentication.TrustedAuthenticationAdapter;
 import org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration;
 import org.xwiki.contrib.authentication.TrustedAuthenticator;
@@ -45,6 +48,7 @@ import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 
+import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.XWikiContext;
 
 /**
@@ -78,6 +82,10 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
 
     @Inject
     private EntityReferenceSerializer<String> defaultStringEntityReferenceSerializer;
+
+    @Inject
+    @Named("local")
+    private EntityReferenceSerializer<String> localStringEntityReferenceSerializer;
 
     private TrustedAuthenticationAdapter authenticationAdapter;
 
@@ -267,10 +275,10 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     private boolean synchronizeUser(DocumentReference user)
     {
         XWikiContext context = contextProvider.get();
-        String database = context.getDatabase();
+        String database = context.getWikiId();
         try {
             // Switch to main wiki to force users to be global users
-            context.setDatabase(user.getWikiReference().getName());
+            context.setWikiId(user.getWikiReference().getName());
 
             Map<String, String> extInfos = getExtendedInformations();
             // test if user already exists
@@ -285,9 +293,11 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
                     "Trusted authenticator user profile synchronization");
             }
 
-            synchronizeGroups(user);
+            if (!synchronizeGroups(user)) {
+                return false;
+            }
         } finally {
-            context.setDatabase(database);
+            context.setWikiId(database);
         }
         return true;
     }
@@ -314,21 +324,43 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     }
 
     /**
-     * Synchronize the user in mapped groups.
+     * Synchronize the user in mapped groups and in dynamic role groups.
      *
      * @param user the reference of the user document.
      */
-    protected void synchronizeGroups(DocumentReference user)
+    private boolean synchronizeGroups(DocumentReference user)
     {
-        Map<DocumentReference, Collection<String>> mappings = getGroupMapping();
+        Collection<DocumentReference> groupInRefs = new ArrayList<DocumentReference>();
+        Collection<DocumentReference> groupOutRefs = new ArrayList<DocumentReference>();
+        Collection<DocumentReference> groupInWithAutoCreateRefs = new ArrayList<DocumentReference>();
 
-        // Only synchronize groups if a group mapping configuration exists
-        if (mappings.size() > 0) {
+        populateGroupsFromMappings(groupInRefs, groupOutRefs);
+
+        if (!populateGroupsFromDynamicRoles(user, groupInRefs, groupInWithAutoCreateRefs, groupOutRefs)) {
+            return false;
+        }
+
+        if (!(groupInRefs.isEmpty() && groupOutRefs.isEmpty() && groupInWithAutoCreateRefs.isEmpty())) {
             logger.debug("Synchronizing groups for user [{}]...", user);
+            userManager.synchronizeGroupsMembership(user, groupInRefs, groupInWithAutoCreateRefs,
+                groupOutRefs, "Trusted authentication group synchronization");
+        }
 
-            Collection<DocumentReference> groupInRefs = new ArrayList<DocumentReference>();
-            Collection<DocumentReference> groupOutRefs = new ArrayList<DocumentReference>();
+        return true;
+    }
 
+    /**
+     * Synchronize the user in mapped groups.
+     *
+     * @param groupInRefs will be filled with groups the user should be in.
+     * @param groupOutRefs will be filled with groups the user should not be in.
+     */
+    private void populateGroupsFromMappings(Collection<DocumentReference> groupInRefs,
+        Collection<DocumentReference> groupOutRefs)
+    {
+        // Only synchronize groups if a group mapping configuration exists
+        Map<DocumentReference, Collection<String>> mappings = getGroupMapping();
+        if (mappings.size() > 0) {
             // membership to add
             for (Map.Entry<DocumentReference, Collection<String>> mapping : mappings.entrySet()) {
                 DocumentReference groupRef = mapping.getKey();
@@ -346,11 +378,195 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
                     groupOutRefs.add(groupRef);
                 }
             }
-
-            // apply synchronization
-            userManager.synchronizeGroupsMembership(user, groupInRefs, groupOutRefs,
-                "Trusted authentication group synchronization");
         }
+    }
+
+    /**
+     * @return the group matching this role with the given dynamic role configuration.
+     *
+     * @param groupInRefs is filled with groups the user should be in.
+     * @param groupOutRefs is filled with groups the user should not be in.
+     */
+    private DocumentReference getGroupForRole(DynamicRoleConfiguration conf, String role)
+    {
+        if (conf.getRoleRegex().isEmpty() || conf.getReplacement().isEmpty()) {
+            return resolveUserOrGroup(role.replaceFirst(conf.getRoleRegex(), conf.getReplacement()));
+        }
+
+        String radical = role.substring(conf.getRolePrefix().length(), role.length() - conf.getRoleSuffix().length());
+        return resolveUserOrGroup(conf.getGroupPrefix() + radical + conf.getGroupSuffix());
+    }
+
+    /**
+     * @return the groups concerned by the given dynamic role configuration.
+     *
+     * @param conf the dynamic role configuration to use.
+     * @param groups the set of groups to filter.
+     */
+    private Collection<DocumentReference> groupsMatchingConfiguration(DynamicRoleConfiguration conf,
+        Collection<DocumentReference> groups)
+    {
+        String[] wikiAndGroupPrefix = conf.getGroupPrefix().split(":", 2);
+        String unqualifiedGroupPrefix = wikiAndGroupPrefix[wikiAndGroupPrefix.length - 1];
+
+        Collection<DocumentReference> matchingGroups = new ArrayList<DocumentReference>();
+
+        for (DocumentReference group : groups) {
+            String g = localStringEntityReferenceSerializer.serialize(group);
+            if (g.startsWith(unqualifiedGroupPrefix) && g.endsWith(conf.getGroupSuffix())) {
+                logger.debug("Group [{}] matches this configuration", g);
+                matchingGroups.add(group);
+            } else {
+                logger.debug("Group [{}] does not match this configuration", g);
+            }
+        }
+
+        return matchingGroups;
+    }
+
+    /**
+     * Fill the groups in which the user should be added, given the roles provided by the authentication adapter
+     * and the dynamic role configurations.
+     *
+     * @param configurations all the dynamic role configurations.
+     * @param groupInRefs is filled with the groups the user should be added to, not to be auto-created.
+     * @param groupInWithAutoCreateRefs is filled with the groups the user should be added to, to be auto-created.
+     *
+     * @return whether the operation succeeded.
+     */
+    private boolean addGroupsFromDynamicRoles(Collection<DynamicRoleConfiguration> configurations,
+        Collection<DocumentReference> groupInRefs, Collection<DocumentReference> groupInWithAutoCreateRefs)
+    {
+        Collection<String> roles = authenticationAdapter.getUserRoles();
+        logger.debug("Found roles: [{}]", roles);
+        if (roles == null) {
+            return false;
+        }
+
+        for (String role : roles) {
+            DynamicRoleConfiguration conf = null;
+            for (DynamicRoleConfiguration config : configurations) {
+                if (config.matchesRole(role)) {
+                    conf = config;
+                    break;
+                }
+            }
+
+            if (conf == null) {
+                logger.debug("Did not find any dynamic configuration for role [{}]", role);
+                continue;
+            }
+
+            logger.debug("Found a dynamic configuration for role [{}]: [{}]", role, conf);
+
+            DocumentReference group = getGroupForRole(conf, role);
+            if (group == null) {
+                continue;
+            }
+
+            logger.debug("Found a group for this role: [{}]", group);
+
+            if (conf.isAutoCreate()) {
+                logger.debug("This group will be auto created if needed.");
+                groupInWithAutoCreateRefs.add(group);
+            } else {
+                logger.debug("This group will not be auto created.");
+                groupInRefs.add(group);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Remove from the first parameters groups that are in the second parameter.
+     *
+     * @param groupsToRemove the collection to remove groups from.
+     * @param addedGroups the collection of groups to remove
+     */
+    private void removeGroups(Collection<DocumentReference> groupsToRemove, Collection<DocumentReference> addedGroups)
+    {
+        for (DocumentReference addedGroup : addedGroups) {
+            String sAddedGroup = defaultStringEntityReferenceSerializer.serialize(addedGroup);
+            Iterator<DocumentReference> iter = groupsToRemove.iterator();
+            while (iter.hasNext()) {
+                String userGroup = defaultStringEntityReferenceSerializer.serialize(iter.next());
+                if (userGroup.equals(sAddedGroup)) {
+                    iter.remove();
+                }
+            }
+        }
+    }
+
+    /**
+     * Given the groups the user is in and the groups in which this user needs to be added, and
+     * given the dynamic role configurations, fill in the groups from which the user is to be removed.
+     *
+     * @param configurations all the dynamic role configurations.
+     * @param groupInRefs the groups the user is to be added to, that are not to be auto-created.
+     * @param groupInWithAutoCreateRefs the groups the user is to be added to, that are to be auto-created.
+     * @param groupOutRefs is filled with the groups the user should be removed from.
+     * @return whether the operation succeeded.
+     */
+    private boolean removeGroupsFromDynamicRoles(Collection<DynamicRoleConfiguration> configurations,
+        DocumentReference user, Collection<DocumentReference> groupInRefs,
+        Collection<DocumentReference> groupInWithAutoCreateRefs,
+        Collection<DocumentReference> groupOutRefs)
+    {
+        XWikiContext context = contextProvider.get();
+        Collection<DocumentReference> userGroupsNotBeingAdded;
+
+        try {
+            userGroupsNotBeingAdded =
+                context.getWiki().getGroupService(context).getAllGroupsReferencesForMember(user, 0, 0, context);
+        } catch (XWikiException e) {
+            logger.error("Failed to get user groups [{}]", user, e);
+            return false;
+        }
+        logger.error("User is in these groups: [{}]", userGroupsNotBeingAdded);
+
+        removeGroups(userGroupsNotBeingAdded, groupInRefs);
+        removeGroups(userGroupsNotBeingAdded, groupInWithAutoCreateRefs);
+
+        logger.error("These groups have not been added: [{}]", userGroupsNotBeingAdded);
+
+        Collection<DocumentReference> matchingGroups = new ArrayList<DocumentReference>();
+        for (DynamicRoleConfiguration conf : configurations) {
+            logger.debug("Removing groups corresponding to missing roles for configuration [{}].", conf);
+            matchingGroups.addAll(groupsMatchingConfiguration(conf, userGroupsNotBeingAdded));
+        }
+        logger.debug("The user will be removed from these groups: [{}].", matchingGroups);
+        groupOutRefs.addAll(matchingGroups);
+        return true;
+    }
+
+    /**
+     * Given the groups the user is in and the dynamic role configurations,
+     * fill in the groups to which the user is to be added and from which the user is to be removed.
+     *
+     * @param DocumentReference all the dynamic role configurations.
+     * @param groupInRefs is filled with the groups the user is to be added to, not to be auto-created.
+     * @param groupInWithAutoCreateRefs is filled with the groups the user is to be added to, to be auto-created.
+     * @param groupOutRefs is filled with the groups the user should be removed from.
+     * @return whether the operation succeeded.
+     */
+    private boolean populateGroupsFromDynamicRoles(DocumentReference user, Collection<DocumentReference> groupInRefs,
+            Collection<DocumentReference> groupInWithAutoCreateRefs,
+            Collection<DocumentReference> groupOutRefs)
+    {
+        Collection<DynamicRoleConfiguration> configs = configuration.getDynamicRoleConfigurations();
+
+        return configs != null
+            && addGroupsFromDynamicRoles(configs, groupInWithAutoCreateRefs, groupOutRefs)
+            && removeGroupsFromDynamicRoles(configs, user, groupInRefs, groupInWithAutoCreateRefs, groupOutRefs);
+    }
+
+    /**
+     * @return the document reference for the given user or group, finding it by default in the default user space.
+     */
+    private DocumentReference resolveUserOrGroup(String userOrGroup)
+    {
+        return defaultStringDocumentReferenceResolver.resolve(userOrGroup, USER_SPACE_REFERENCE);
     }
 
     /**
@@ -362,9 +578,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
             Map<String, Collection<String>> mappings = configuration.getGroupMappings();
             this.groupMappings = new HashMap<DocumentReference, Collection<String>>();
             for (Map.Entry<String, Collection<String>> mapping : mappings.entrySet()) {
-                this.groupMappings.put(
-                    defaultStringDocumentReferenceResolver.resolve(mapping.getKey(), USER_SPACE_REFERENCE),
-                    mapping.getValue());
+                this.groupMappings.put(resolveUserOrGroup(mapping.getKey()), mapping.getValue());
             }
         }
 

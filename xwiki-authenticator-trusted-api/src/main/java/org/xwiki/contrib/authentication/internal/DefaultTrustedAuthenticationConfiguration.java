@@ -21,6 +21,7 @@
 package org.xwiki.contrib.authentication.internal;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -34,6 +35,7 @@ import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.contrib.authentication.AuthenticationPersistenceStore;
 import org.xwiki.contrib.authentication.TrustedAuthenticationAdapter;
+import org.xwiki.contrib.authentication.DynamicRoleConfiguration;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.user.api.XWikiAuthService;
@@ -83,10 +85,15 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
     private static final String PROPERTY_MAPPING_PROPERTY = "propertiesMapping";
     private static final char PROPERTY_MAPPING_SEP = '|';
 
+    private static final String DYNAMIC_ROLE_PROPERTY = "dynamicRole";
+    private static final String DYNAMIC_ROLE_CONFIGURATIONS_PROPERTY = DYNAMIC_ROLE_PROPERTY + ".configurations";
+    private static final String DYNAMIC_ROLE_CONFIGURATION_PREFIX = DYNAMIC_ROLE_PROPERTY + ".configuration.";
     private static final String LOGOUTPAGE_CONFIG_KEY = "xwiki.authentication.logoutpage";
 
     @Inject
     private ComponentManager componentManager;
+
+    private Collection<DynamicRoleConfiguration> dynamicRoleConfigurations;
 
     /**
      * Default constructor.
@@ -230,5 +237,27 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
         XWikiContext context = contextProvider.get();
         return StringUtils.removeStart(url.toExternalForm(),
             url.getProtocol() + "://" + url.getAuthority() + context.getWiki().getWebAppPath(context));
+    }
+
+    @Override
+    public Collection<DynamicRoleConfiguration> getDynamicRoleConfigurations()
+    {
+        if (dynamicRoleConfigurations == null) {
+            String[] configurationNames = getCustomProperty(DYNAMIC_ROLE_CONFIGURATIONS_PROPERTY, "").split("\\|");
+            dynamicRoleConfigurations = new ArrayList<DynamicRoleConfiguration>(configurationNames.length);
+            for (String name : configurationNames) {
+                String prefix = DYNAMIC_ROLE_CONFIGURATION_PREFIX + name + ".";
+                DynamicRoleConfiguration conf = new DefaultDynamicRoleConfiguration(this, prefix, name);
+                if (conf.getGroupPrefix().isEmpty() && conf.getGroupSuffix().isEmpty()) {
+                    // Allowing configurations without group prefix or suffix would be dangerous
+                    // as it would match any group the user is in
+                    logger.error("Dynamic role configuration [{}] doesn't specify any group prefix or suffix. "
+                        + "To be safe, access will be denied until the configuration is fixed.");
+                    return null;
+                }
+                dynamicRoleConfigurations.add(conf);
+            }
+        }
+        return dynamicRoleConfigurations;
     }
 }
