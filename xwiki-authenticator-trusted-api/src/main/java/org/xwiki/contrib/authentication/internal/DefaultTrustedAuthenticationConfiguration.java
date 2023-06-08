@@ -93,7 +93,7 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
     @Inject
     private ComponentManager componentManager;
 
-    private ArrayList<DynamicRoleConfiguration> dynamicRoleConfigurations;
+    private Collection<DynamicRoleConfiguration> dynamicRoleConfigurations;
 
     /**
      * Default constructor.
