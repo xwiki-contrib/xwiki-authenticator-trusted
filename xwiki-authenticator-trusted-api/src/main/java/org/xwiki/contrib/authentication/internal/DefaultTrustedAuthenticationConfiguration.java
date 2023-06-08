@@ -251,7 +251,8 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
                 if (conf.getGroupPrefix().isEmpty() && conf.getGroupSuffix().isEmpty()) {
                     // Allowing configurations without group prefix or suffix would be dangerous
                     // as it would match any group the user is in
-                    logger.error("Dynamic role configuration [{}] doesn't specify any group prefix or suffix.");
+                    logger.error("Dynamic role configuration [{}] doesn't specify any group prefix or suffix. "
+                        + "To be safe, access will be denied until the configuration is fixed.");
                     return null;
                 }
                 dynamicRoleConfigurations.add(conf);
