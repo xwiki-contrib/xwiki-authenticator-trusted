@@ -69,7 +69,11 @@ public interface TrustedAuthenticationAdapter
 
 
     /**
-     * @return the roles the user is part of.
+     * @return the roles the user is part of, or null if the implementation
+     *         does not support getting all the roles, in which case dynamic
+     *         role configurations can't work and the autenticator will refuse
+     *         to authenticate users if such configurations are present.
+     *
      * @since 1.6.0
      */
     default Collection<String> getUserRoles()
