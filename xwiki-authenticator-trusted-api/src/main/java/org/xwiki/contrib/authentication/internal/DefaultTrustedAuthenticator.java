@@ -267,10 +267,10 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     private boolean synchronizeUser(DocumentReference user)
     {
         XWikiContext context = contextProvider.get();
-        String database = context.getDatabase();
+        String database = context.getWikiId();
         try {
             // Switch to main wiki to force users to be global users
-            context.setDatabase(user.getWikiReference().getName());
+            context.setWikiId(user.getWikiReference().getName());
 
             Map<String, String> extInfos = getExtendedInformations();
             // test if user already exists
@@ -287,7 +287,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
 
             synchronizeGroups(user);
         } finally {
-            context.setDatabase(database);
+            context.setWikiId(database);
         }
         return true;
     }
