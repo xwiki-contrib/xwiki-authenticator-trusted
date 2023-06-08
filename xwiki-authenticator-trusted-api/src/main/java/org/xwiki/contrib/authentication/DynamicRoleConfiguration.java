@@ -67,5 +67,5 @@ public interface DynamicRoleConfiguration
     /**
      * @return whether the involved groups should be auto created as needed.
      */
-    boolean getAutoCreate();
+    boolean isAutoCreate();
 }

@@ -466,7 +466,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
 
             logger.debug("Found a group for this role: [{}]", group);
 
-            if (conf.getAutoCreate()) {
+            if (conf.isAutoCreate()) {
                 logger.debug("This group will be auto created if needed.");
                 groupInWithAutoCreateRefs.add(group);
             } else {

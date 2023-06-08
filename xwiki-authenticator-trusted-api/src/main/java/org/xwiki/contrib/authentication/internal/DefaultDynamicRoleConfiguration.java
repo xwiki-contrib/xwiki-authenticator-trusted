@@ -108,7 +108,7 @@ public class DefaultDynamicRoleConfiguration implements DynamicRoleConfiguration
     }
 
     @Override
-    public boolean getAutoCreate()
+    public boolean isAutoCreate()
     {
         return autoCreate;
     }
