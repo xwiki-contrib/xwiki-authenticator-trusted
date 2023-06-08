@@ -27,7 +27,7 @@ import org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration;
  * Default implementation of {@link DynamicRoleConfiguration}.
  *
  * @version $Id$
- * @since 1.5.2
+ * @since 1.6.0
  */
 public class DefaultDynamicRoleConfiguration implements DynamicRoleConfiguration
 {

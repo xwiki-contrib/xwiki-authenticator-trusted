@@ -24,7 +24,7 @@ package org.xwiki.contrib.authentication;
  * Dynamic role configuration.
  *
  * @version $Id$
- * @since 1.5.2
+ * @since 1.6.0
  */
 public interface DynamicRoleConfiguration
 {

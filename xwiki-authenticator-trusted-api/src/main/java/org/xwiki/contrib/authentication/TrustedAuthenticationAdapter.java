@@ -70,7 +70,7 @@ public interface TrustedAuthenticationAdapter
 
     /**
      * @return the roles the user is part of.
-     * @since 1.5.2
+     * @since 1.6.0
      */
     default Collection<String> getUserRoles()
     {

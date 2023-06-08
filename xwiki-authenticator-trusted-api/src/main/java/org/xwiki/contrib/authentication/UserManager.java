@@ -76,7 +76,7 @@ public interface UserManager
      * @param groupOutRefs the reference of the groups the user should not be in.
      * @param comment the comment used for saving modification to groups.
      * @return true when the user has been successfully synchronized.
-     * @since 1.5.2
+     * @since 1.6.0
      */
     default boolean synchronizeGroupsMembership(DocumentReference user, Collection<DocumentReference> groupInRefs,
         Collection<DocumentReference> groupWithAutoCreateInRefs, Collection<DocumentReference> groupOutRefs,

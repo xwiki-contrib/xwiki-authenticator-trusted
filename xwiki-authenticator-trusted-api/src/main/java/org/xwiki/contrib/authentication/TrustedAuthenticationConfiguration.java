@@ -199,6 +199,8 @@ public interface TrustedAuthenticationConfiguration
      * @return the dynamic role configurations. Empty if no configuration is provided,
      *         null if some issue happened while parsing the configurations. In
      *         the later case, authentication should be blocked for any user.
+     *
+     * @since 1.6.0
      */
     default Collection<DynamicRoleConfiguration> getDynamicRoleConfigurations()
     {
