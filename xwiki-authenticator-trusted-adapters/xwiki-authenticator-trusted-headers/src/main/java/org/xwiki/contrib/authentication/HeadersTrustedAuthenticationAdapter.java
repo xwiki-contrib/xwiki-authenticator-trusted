@@ -23,9 +23,11 @@ package org.xwiki.contrib.authentication;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -65,6 +67,8 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
     private static final String DEFAULT_GROUP_VALUE_SEPARATOR = "\\|";
 
     private static final String LOGOUT_URL_REDIRECTION_PLACEHOLDER = "__REDIRECT__";
+
+    private static final char COMMA_SEPARATOR = ',';
 
     @Inject
     private Logger logger;
@@ -150,17 +154,21 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
     @Override
     public List<String> getUserRoles()
     {
-        String groupFieldName = configuration.getCustomProperty(CONFIG_GROUP_FIELD, null);
-        String headerValue = null;
-        if (groupFieldName != null) {
-            headerValue = getHeader(groupFieldName);
-        }
-        if (StringUtils.isBlank(headerValue)) {
-            return Collections.<String>emptyList();
+        List<String> groupFieldNames =
+            configuration.getCustomPropertyAsList(CONFIG_GROUP_FIELD, COMMA_SEPARATOR, null);
+
+        // Use a set to ensure that we don't send back duplicate roles
+        Set<String> headerValues = new HashSet<>();
+        if (groupFieldNames != null) {
+            String groupValueSeparator = configuration.getCustomProperty(CONFIG_GROUP_VALUE_SEPARATOR,
+                DEFAULT_GROUP_VALUE_SEPARATOR);
+
+            for (String groupFieldName : groupFieldNames) {
+                headerValues.addAll(Arrays.asList(getHeader(groupFieldName).split(groupValueSeparator)));
+            }
         }
 
-        return Arrays.asList(headerValue.split(configuration.getCustomProperty(CONFIG_GROUP_VALUE_SEPARATOR,
-            DEFAULT_GROUP_VALUE_SEPARATOR)));
+        return new ArrayList<>(headerValues);
     }
 
     @Override
