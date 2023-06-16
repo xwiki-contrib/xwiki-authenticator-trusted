@@ -48,9 +48,8 @@ import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 
-import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.XWikiContext;
-
+import com.xpn.xwiki.XWikiException;
 /**
  * Default implementation of the {@link TrustedAuthenticator} role.
  *
@@ -469,6 +468,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
             if (conf.isAutoCreate()) {
                 logger.debug("This group will be auto created if needed.");
                 groupInWithAutoCreateRefs.add(group);
+                // AddGroupToField.add(contextProvider.get(), group, role, conf);
             } else {
                 logger.debug("This group will not be auto created.");
                 groupInRefs.add(group);
