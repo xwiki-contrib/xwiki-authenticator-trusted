@@ -20,62 +20,55 @@ package org.xwiki.contrib.authentication;
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
+import org.xwiki.model.reference.DocumentReference;
+
 /**
- * Dynamic role configuration.
+ * Add group to field configuration.
  *
  * @version $Id$
- * @since 1.6.0
+ * @since 1.7.0
  */
-public interface DynamicRoleConfiguration
+public interface AddGroupToFieldConfiguration
 {
     /**
-     * @return whether the given role matche this configuration.
-     * @param role the role to match
+     * @return the page.
      */
-    boolean matchesRole(String role);
+    String getPage();
 
     /**
-     * @return the role prefix.
+     * @return the class name.
      */
-    String getRolePrefix();
+    String getClassName();
 
     /**
-     * @return the role suffix.
+     * @return the class name.
      */
-    String getRoleSuffix();
+    String getObjectNumber();
 
     /**
-     * @return the role regex.
+     * @return the property name.
      */
-    String getRoleRegex();
+    String getPropertyName();
 
     /**
-     * @return the replacement to use with the role regex to get the group name.
+     * @return the separator.
      */
-    String getReplacement();
+    String getSeparator();
 
     /**
-     * @return the group prefix.
+     * @return the value regular expression.
      */
-    String getGroupPrefix();
+    String getValueRegex();
 
     /**
-     * @return the group suffix.
+     * @return the value format.
      */
-    String getGroupSuffix();
+    String getValueFormat();
 
     /**
-     * @return whether the involved groups should be auto created as needed.
+     * @return the value from the group and the role. null if this failed.
+     * @param group the group to build the value from.
+     * @param role the role to build the value from.
      */
-    boolean isAutoCreate();
-
-    /**
-     * @return the add group to field configuration corresponding to this dynamic role.
-     *         null if none present
-     * @since 1.7.0
-     */
-    default AddGroupToFieldConfiguration getAddGroupToFieldConfiguration()
-    {
-        return null;
-    }
+    String getValue(DocumentReference group, String role);
 }

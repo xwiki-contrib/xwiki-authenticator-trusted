@@ -21,6 +21,7 @@
 package org.xwiki.contrib.authentication.internal;
 
 import org.xwiki.contrib.authentication.DynamicRoleConfiguration;
+import org.xwiki.contrib.authentication.AddGroupToFieldConfiguration;
 import org.xwiki.contrib.authentication.TrustedAuthenticationConfiguration;
 
 /**
@@ -39,9 +40,11 @@ public class DefaultDynamicRoleConfiguration implements DynamicRoleConfiguration
     private final String groupPrefix;
     private final String groupSuffix;
     private final boolean autoCreate;
+    private final AddGroupToFieldConfiguration agtfc;
 
     protected DefaultDynamicRoleConfiguration(TrustedAuthenticationConfiguration authConf,
-            String confPrefix, String configurationName)
+            String confPrefix, String agtfConfPrefix, String configurationName,
+            AddGroupToFieldConfiguration addGroupToFieldConfiguration)
     {
         this.configurationName = configurationName;
         rolePrefix = authConf.getCustomProperty(confPrefix + "rolePrefix", "");
@@ -51,6 +54,7 @@ public class DefaultDynamicRoleConfiguration implements DynamicRoleConfiguration
         groupSuffix = authConf.getCustomProperty(confPrefix + "groupSuffix", "");
         replacement = authConf.getCustomProperty(confPrefix + "replacement", "");
         autoCreate = authConf.getCustomPropertyAsBoolean(confPrefix + "autocreate", true);
+        agtfc = DefaultAddGroupToFieldConfiguration.parse(authConf, agtfConfPrefix, addGroupToFieldConfiguration);
     }
 
     @Override
@@ -113,6 +117,13 @@ public class DefaultDynamicRoleConfiguration implements DynamicRoleConfiguration
         return autoCreate;
     }
 
+
+    @Override
+    public AddGroupToFieldConfiguration getAddGroupToFieldConfiguration()
+    {
+        return agtfc;
+    }
+
     @Override
     public String toString()
     {
@@ -123,6 +134,7 @@ public class DefaultDynamicRoleConfiguration implements DynamicRoleConfiguration
             + ", replacement: " + replacement
             + ", group prefix: " + groupPrefix
             + ", group suffix: " + groupSuffix
-            + ", auto create groups: " + autoCreate;
+            + ", auto create groups: " + autoCreate
+            + ", add group to field configuration: [" + agtfc + "]";
     }
 }

@@ -48,9 +48,8 @@ import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 
-import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.XWikiContext;
-
+import com.xpn.xwiki.XWikiException;
 /**
  * Default implementation of the {@link TrustedAuthenticator} role.
  *
@@ -443,6 +442,9 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
             return false;
         }
 
+        AddGroupToField agtf = new AddGroupToField();
+        XWikiContext context = contextProvider.get();
+
         for (String role : roles) {
             DynamicRoleConfiguration conf = null;
             for (DynamicRoleConfiguration config : configurations) {
@@ -469,12 +471,14 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
             if (conf.isAutoCreate()) {
                 logger.debug("This group will be auto created if needed.");
                 groupInWithAutoCreateRefs.add(group);
+                agtf.add(context, group, role, conf);
             } else {
                 logger.debug("This group will not be auto created.");
                 groupInRefs.add(group);
             }
         }
 
+        agtf.save(context);
         return true;
     }
 

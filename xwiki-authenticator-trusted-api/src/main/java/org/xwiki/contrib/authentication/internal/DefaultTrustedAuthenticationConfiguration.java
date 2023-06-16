@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.component.manager.ComponentManager;
+import org.xwiki.contrib.authentication.AddGroupToFieldConfiguration;
 import org.xwiki.contrib.authentication.AuthenticationPersistenceStore;
 import org.xwiki.contrib.authentication.TrustedAuthenticationAdapter;
 import org.xwiki.contrib.authentication.DynamicRoleConfiguration;
@@ -85,7 +86,11 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
     private static final String PROPERTY_MAPPING_PROPERTY = "propertiesMapping";
     private static final char PROPERTY_MAPPING_SEP = '|';
 
+    private static final String ADD_GROUP_TO_FIELD_PREFIX = "addGroupToField.";
     private static final String DYNAMIC_ROLE_PROPERTY = "dynamicRole";
+    private static final String DOT = ".";
+    private static final String GLOBAL_ADD_GROUP_TO_FIELD_PREFIX =
+            DYNAMIC_ROLE_PROPERTY + DOT + ADD_GROUP_TO_FIELD_PREFIX;
     private static final String DYNAMIC_ROLE_CONFIGURATIONS_PROPERTY = DYNAMIC_ROLE_PROPERTY + ".configurations";
     private static final String DYNAMIC_ROLE_CONFIGURATION_PREFIX = DYNAMIC_ROLE_PROPERTY + ".configuration.";
     private static final String LOGOUTPAGE_CONFIG_KEY = "xwiki.authentication.logoutpage";
@@ -245,9 +250,13 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
         if (dynamicRoleConfigurations == null) {
             String[] configurationNames = getCustomProperty(DYNAMIC_ROLE_CONFIGURATIONS_PROPERTY, "").split("\\|");
             dynamicRoleConfigurations = new ArrayList<DynamicRoleConfiguration>(configurationNames.length);
+            AddGroupToFieldConfiguration agtfConf = DefaultAddGroupToFieldConfiguration.parse(this,
+                GLOBAL_ADD_GROUP_TO_FIELD_PREFIX, null);
+
             for (String name : configurationNames) {
-                String prefix = DYNAMIC_ROLE_CONFIGURATION_PREFIX + name + ".";
-                DynamicRoleConfiguration conf = new DefaultDynamicRoleConfiguration(this, prefix, name);
+                String prefix = DYNAMIC_ROLE_CONFIGURATION_PREFIX + name + DOT;
+                DynamicRoleConfiguration conf = new DefaultDynamicRoleConfiguration(this, prefix,
+                        prefix + ADD_GROUP_TO_FIELD_PREFIX, name, agtfConf);
                 if (conf.getGroupPrefix().isEmpty() && conf.getGroupSuffix().isEmpty()) {
                     // Allowing configurations without group prefix or suffix would be dangerous
                     // as it would match any group the user is in
