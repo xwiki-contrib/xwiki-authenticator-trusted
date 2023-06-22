@@ -527,12 +527,12 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
             logger.error("Failed to get user groups [{}]", user, e);
             return false;
         }
-        logger.error("User is in these groups: [{}]", userGroupsNotBeingAdded);
+        logger.debug("User is in these groups: [{}]", userGroupsNotBeingAdded);
 
         removeGroups(userGroupsNotBeingAdded, groupInRefs);
         removeGroups(userGroupsNotBeingAdded, groupInWithAutoCreateRefs);
 
-        logger.error("These groups have not been added: [{}]", userGroupsNotBeingAdded);
+        logger.debug("These groups have not been added: [{}]", userGroupsNotBeingAdded);
 
         Collection<DocumentReference> matchingGroups = new ArrayList<DocumentReference>();
         for (DynamicRoleConfiguration conf : configurations) {
