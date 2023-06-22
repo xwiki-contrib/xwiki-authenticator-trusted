@@ -164,7 +164,10 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
                 DEFAULT_GROUP_VALUE_SEPARATOR);
 
             for (String groupFieldName : groupFieldNames) {
-                headerValues.addAll(Arrays.asList(getHeader(groupFieldName).split(groupValueSeparator)));
+                String groupHeaders = getHeader(groupFieldName);
+                if (StringUtils.isNotBlank(groupHeaders)) {
+                    headerValues.addAll(Arrays.asList(groupHeaders.split(groupValueSeparator)));
+                }
             }
         }
 
