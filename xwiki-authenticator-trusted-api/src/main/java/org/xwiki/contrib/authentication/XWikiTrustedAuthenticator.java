@@ -122,6 +122,6 @@ public class XWikiTrustedAuthenticator extends XWikiAuthServiceImpl
             return authService.authenticate(userId, password, context);
         }
         LOG.debug("Falling back to default XWiki authenticate.");
-        return authService.authenticate(userId, password, context);
+        return super.authenticate(userId, password, context);
     }
 }
