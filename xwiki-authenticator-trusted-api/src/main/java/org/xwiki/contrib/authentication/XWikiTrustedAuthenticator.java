@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
 
+import java.security.Principal;
+
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.user.api.XWikiAuthService;
@@ -73,11 +75,11 @@ public class XWikiTrustedAuthenticator extends XWikiAuthServiceImpl
 
         XWikiAuthService authService = configuration.getFallbackAuthenticator();
         if (authService != null) {
-            LOG.debug("Falling back to [{}] authentication.", authService);
+            LOG.debug("Falling back to [{}] checkAuth.", authService);
             return authService.checkAuth(context);
         }
 
-        LOG.debug("Falling back to default XWiki authentication.");
+        LOG.debug("Falling back to default XWiki checkAuth.");
         return super.checkAuth(context);
     }
 
@@ -106,5 +108,20 @@ public class XWikiTrustedAuthenticator extends XWikiAuthServiceImpl
         }
 
         return super.checkAuth(username, password, rememberme, context);
+    }
+
+    /**
+     * Override the authenticate function to implement fallback.
+     */
+    @Override
+    public Principal authenticate(String userId, String password, XWikiContext context) throws XWikiException
+    {
+        XWikiAuthService authService = configuration.getFallbackAuthenticator();
+        if (authService != null) {
+            LOG.debug("Falling back to [{}] authenticate.", authService);
+            return authService.authenticate(userId, password, context);
+        }
+        LOG.debug("Falling back to default XWiki authenticate.");
+        return authService.authenticate(userId, password, context);
     }
 }
