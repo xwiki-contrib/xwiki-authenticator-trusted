@@ -41,44 +41,62 @@ public interface TrustedAuthenticationConfiguration
     /**
      * Letter case styles.
      */
-    enum CaseStyle {
+    enum CaseStyle
+    {
+        /**
+         * Upper case.
+         */
         UPPERCASE,
+
+        /**
+         * Lower case.
+         */
         LOWERCASE,
+
+        /**
+         * First character upper case and the rest lower case.
+         */
         TITLECASE,
+
+        /**
+         * No style.
+         */
         NONE
     }
 
     /**
-     * Return the authentication adapter that will bridge the trusted authentication with this generic
-     * trusted authenticator.
+     * Return the authentication adapter that will bridge the trusted authentication with this generic trusted
+     * authenticator.
+     * 
      * @return the authentication adapter used for retrieving user information.
      */
     TrustedAuthenticationAdapter getAuthenticationAdapter();
 
     /**
-     * Mainly for performance reason, the currently logged user UID should be persisted across request, this
-     * method return the persistence store according to the configuration. Most common implementation is provided
-     * for storing userUID in session or encrypted cookie, with respective hint <code>session</code> and
-     * <code>cookie</code>, default is to use <code>session</code>.
+     * Mainly for performance reason, the currently logged user UID should be persisted across request, this method
+     * return the persistence store according to the configuration. Most common implementation is provided for storing
+     * userUID in session or encrypted cookie, with respective hint <code>session</code> and <code>cookie</code>,
+     * default is to use <code>session</code>.
+     * 
      * @return the persistence store to be used.
      */
     AuthenticationPersistenceStore getPersistenceStore();
 
     /**
-     * @return true if the above persistence store should be trusted for authentication, or false if it should
-     * only be used for optimization of the user and group synchronization.
+     * @return true if the above persistence store should be trusted for authentication, or false if it should only be
+     *         used for optimization of the user and group synchronization.
      */
     boolean isPersistenceStoreTrusted();
 
     /**
-     * @return true when a not trusted persistence store should still be trusted when the adapter does not provide
-     * an authenticated user (null user identifier received).
-     *
+     * @return true when a not trusted persistence store should still be trusted when the adapter does not provide an
+     *         authenticated user (null user identifier received).
      */
     boolean isPersistenceStoreTrustedOnMissingAuthentication();
 
     /**
      * TTL of the persistence storage, currently only applicable to COOKIE* modes.
+     * 
      * @return how long in seconds persistence should be considered valid before being drop since initial setup.
      */
     int getPersistenceTTL();
@@ -90,18 +108,20 @@ public interface TrustedAuthenticationConfiguration
 
     /**
      * @return the character replacements that should be applied to username for defining the name of the user profile
-     * page, after having applied the user profile case style.
+     *         page, after having applied the user profile case style.
      */
     Map<String, String> getUserProfileReplacements();
 
     /**
      * Retrieve the mapping between XWiki user properties and user property provided by the AuthenticationAdapter.
+     * 
      * @return a map between XWikiUsers property names and names of properties returned by the AuthenticationAdapter
      */
     Map<String, String> getUserPropertyMappings();
 
     /**
      * Retrieve the mapping between XWiki groups and user roles provided by the AuthenticationAdapter.
+     * 
      * @return a map between XWiki groups and a list of roles
      */
     Map<String, Collection<String>> getGroupMappings();
@@ -123,8 +143,7 @@ public interface TrustedAuthenticationConfiguration
     String getLogoutPagePattern();
 
     /**
-     * Retrieve value of a simple property.
-     * Example: <code>name = value</code>
+     * Retrieve value of a simple property. Example: <code>name = value</code>
      *
      * @param name the property name
      * @param def default value to be used when no value for the property has been found
@@ -133,8 +152,7 @@ public interface TrustedAuthenticationConfiguration
     String getCustomProperty(String name, String def);
 
     /**
-     * Retrieve value of a property as a boolean.
-     * Example: <code>name = yes</code>
+     * Retrieve value of a property as a boolean. Example: <code>name = yes</code>
      *
      * @param name the property name
      * @param def default value to be used when no value for the property has been found
@@ -143,9 +161,8 @@ public interface TrustedAuthenticationConfiguration
     boolean getCustomPropertyAsBoolean(String name, boolean def);
 
     /**
-     * Retrieve list of values assigned to a property.
-     * Example: <code>name = value1, value2, value1, value3</code>
-     * With coma as separator, it return a list of 4 values
+     * Retrieve list of values assigned to a property. Example: <code>name = value1, value2, value1, value3</code> With
+     * coma as separator, it return a list of 4 values
      *
      * @param name the property name
      * @param separator the value separator
@@ -155,9 +172,8 @@ public interface TrustedAuthenticationConfiguration
     List<String> getCustomPropertyAsList(String name, char separator, List<String> def);
 
     /**
-     * Retrieve set of values assigned to a property.
-     * Example: <code>name = value1, value2, value1, value3</code>
-     * With coma as separator, it return a set of 3 values
+     * Retrieve set of values assigned to a property. Example: <code>name = value1, value2, value1, value3</code> With
+     * coma as separator, it return a set of 3 values
      *
      * @param name the property name
      * @param separator the value separator
@@ -167,9 +183,9 @@ public interface TrustedAuthenticationConfiguration
     Set<String> getCustomPropertyAsSet(String name, char separator, Set<String> def);
 
     /**
-     * Retrieve map of key/value pairs assigned to a property.
-     * Example: <code>name = key1=value1, key2=value2, key1=value1b, key3=value3</code>
-     * With coma as separator, it return a map with 3 entries, key1 being associated to value1b.
+     * Retrieve map of key/value pairs assigned to a property. Example:
+     * <code>name = key1=value1, key2=value2, key1=value1b, key3=value3</code> With coma as separator, it return a map
+     * with 3 entries, key1 being associated to value1b.
      *
      * @param name the property name
      * @param separator the value separator
@@ -181,10 +197,9 @@ public interface TrustedAuthenticationConfiguration
         boolean forceLowerCaseKey);
 
     /**
-     * Retrieve map of key/listOfValues pairs assigned to a property.
-     * Example: <code>name = key1=value1, key2=value2, key1=value1b, key3=value3</code>
-     * With coma as separator, it return a map with 3 entries, <code>key1</code> being associated to
-     * a list of 2 values.
+     * Retrieve map of key/listOfValues pairs assigned to a property. Example:
+     * <code>name = key1=value1, key2=value2, key1=value1b, key3=value3</code> With coma as separator, it return a map
+     * with 3 entries, <code>key1</code> being associated to a list of 2 values.
      *
      * @param name the property name
      * @param separator the value separator
@@ -196,10 +211,8 @@ public interface TrustedAuthenticationConfiguration
         Map<String, Collection<String>> def, boolean left);
 
     /**
-     * @return the dynamic role configurations. Empty if no configuration is provided,
-     *         null if some issue happened while parsing the configurations. In
-     *         the later case, authentication should be blocked for any user.
-     *
+     * @return the dynamic role configurations. Empty if no configuration is provided, null if some issue happened while
+     *         parsing the configurations. In the later case, authentication should be blocked for any user.
      * @since 1.6.0
      */
     default Collection<DynamicRoleConfiguration> getDynamicRoleConfigurations()

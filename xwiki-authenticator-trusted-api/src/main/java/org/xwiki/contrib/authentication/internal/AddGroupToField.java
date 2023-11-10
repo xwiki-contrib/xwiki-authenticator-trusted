@@ -20,25 +20,24 @@
 
 package org.xwiki.contrib.authentication.internal;
 
-import java.util.Map;
 import java.util.HashMap;
-import java.util.regex.Pattern;
+import java.util.Map;
 import java.util.regex.Matcher;
-
-import org.xwiki.contrib.authentication.AddGroupToFieldConfiguration;
-import org.xwiki.contrib.authentication.DynamicRoleConfiguration;
-
-import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.model.reference.EntityReferenceSerializer;
-import org.xwiki.model.reference.DocumentReferenceResolver;
-import com.xpn.xwiki.objects.BaseObject;
-import com.xpn.xwiki.doc.XWikiDocument;
-import com.xpn.xwiki.web.Utils;
-import com.xpn.xwiki.XWikiContext;
-import com.xpn.xwiki.XWikiException;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xwiki.contrib.authentication.AddGroupToFieldConfiguration;
+import org.xwiki.contrib.authentication.DynamicRoleConfiguration;
+import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.DocumentReferenceResolver;
+import org.xwiki.model.reference.EntityReferenceSerializer;
+
+import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.BaseObject;
+import com.xpn.xwiki.web.Utils;
 
 /**
  * Add group to field utility class.
@@ -48,16 +47,18 @@ import org.slf4j.LoggerFactory;
 class AddGroupToField
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAddGroupToFieldConfiguration.class);
+
     private static final String DEF = "default";
 
     private final Map<String, XWikiDocument> documentsToSave;
 
-    protected AddGroupToField() {
+    protected AddGroupToField()
+    {
         documentsToSave = new HashMap<String, XWikiDocument>();
     }
 
-    private static BaseObject getObject(XWikiDocument doc, XWikiContext context,
-            String className, String number, String property)
+    private static BaseObject getObject(XWikiDocument doc, XWikiContext context, String className, String number,
+        String property)
     {
         if (className.isEmpty()) {
             return doc.getFirstObject(property);
@@ -70,18 +71,20 @@ class AddGroupToField
         return doc.getXObject(resolve(className), Integer.parseInt(number));
     }
 
-    private static String serialize(DocumentReference docRef) {
+    private static String serialize(DocumentReference docRef)
+    {
         EntityReferenceSerializer<String> serializer = Utils.getComponent(EntityReferenceSerializer.TYPE_STRING, DEF);
         return serializer.serialize(docRef);
     }
 
-    private static DocumentReference resolve(String page) {
+    private static DocumentReference resolve(String page)
+    {
         DocumentReferenceResolver<String> resolver = Utils.getComponent(DocumentReferenceResolver.TYPE_STRING, DEF);
         return resolver.resolve(page);
     }
 
-    private static boolean isGroupRolePresent(DocumentReference group, String role,
-            String values, AddGroupToFieldConfiguration c)
+    private static boolean isGroupRolePresent(DocumentReference group, String role, String values,
+        AddGroupToFieldConfiguration c)
     {
         Pattern valueRegex = Pattern.compile(c.getValueRegex());
         String sGroup = serialize(group);
@@ -115,8 +118,8 @@ class AddGroupToField
                     LOGGER.debug("No capturing group named 'role' in the regex. Not checking roles match.");
                 }
 
-                LOGGER.debug("Group [{}] / role [{}] is already in property [{}] of [{}]. Matching value: [{}]",
-                    group, role, c.getPropertyName(), c.getPage(), keyVal);
+                LOGGER.debug("Group [{}] / role [{}] is already in property [{}] of [{}]. Matching value: [{}]", group,
+                    role, c.getPropertyName(), c.getPage(), keyVal);
 
                 return true;
             } else {
@@ -124,14 +127,13 @@ class AddGroupToField
             }
         }
 
-        LOGGER.debug("Group [{}] / role [{}] was not found in property [{}] of [{}].",
-            group, role, c.getPropertyName(), c.getPage());
+        LOGGER.debug("Group [{}] / role [{}] was not found in property [{}] of [{}].", group, role, c.getPropertyName(),
+            c.getPage());
 
         return false;
     }
 
-    private XWikiDocument getXWikiDocument(String page, XWikiContext context, boolean saving)
-        throws XWikiException
+    private XWikiDocument getXWikiDocument(String page, XWikiContext context, boolean saving) throws XWikiException
     {
 
         XWikiDocument xdoc = documentsToSave.get(page);
@@ -149,8 +151,7 @@ class AddGroupToField
     {
         AddGroupToFieldConfiguration c = conf.getAddGroupToFieldConfiguration();
         if (c == null) {
-            LOGGER.debug("Group [{}] / role [{}] does not have any add group to field conf.",
-                group, role);
+            LOGGER.debug("Group [{}] / role [{}] does not have any add group to field conf.", group, role);
             return;
         }
 
@@ -174,8 +175,7 @@ class AddGroupToField
             return;
         }
 
-        BaseObject obj = getObject(doc, context,
-                c.getClassName(), c.getObjectNumber(), c.getPropertyName());
+        BaseObject obj = getObject(doc, context, c.getClassName(), c.getObjectNumber(), c.getPropertyName());
 
         if (obj == null) {
             LOGGER.error("Could not find any object matching configuration [{}]. The field won't be updated.",
@@ -194,8 +194,8 @@ class AddGroupToField
 
         if (!isGroupRolePresent(group, role, values, c)) {
             String newValue = c.getValue(group, role);
-            LOGGER.debug("Group [{}] / role [{}] was not found in property [{}] of [{}]. Adding it: [{}]",
-                group, role, c.getPropertyName(), page, newValue);
+            LOGGER.debug("Group [{}] / role [{}] was not found in property [{}] of [{}]. Adding it: [{}]", group, role,
+                c.getPropertyName(), page, newValue);
 
             obj.setLargeStringValue(c.getPropertyName(), values + c.getSeparator() + newValue);
             documentsToSave.put(page, doc);

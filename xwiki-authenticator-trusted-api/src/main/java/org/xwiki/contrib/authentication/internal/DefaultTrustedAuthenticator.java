@@ -47,9 +47,13 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.DocumentReferenceResolver;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
+import org.xwiki.observation.ObservationManager;
+import org.xwiki.security.authentication.UserAuthenticatedEvent;
+import org.xwiki.user.UserReferenceResolver;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
+
 /**
  * Default implementation of the {@link TrustedAuthenticator} role.
  *
@@ -85,6 +89,13 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     @Inject
     @Named("local")
     private EntityReferenceSerializer<String> localStringEntityReferenceSerializer;
+
+    @Inject
+    private ObservationManager observation;
+
+    @Inject
+    @Named("document")
+    private UserReferenceResolver<DocumentReference> userReferenceResolver;
 
     private TrustedAuthenticationAdapter authenticationAdapter;
 
@@ -123,8 +134,8 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     }
 
     /**
-     * Proceed to the authentication, checking with the adapter if the previously authenticated user is not trusted,
-     * and creating and synchronizing user profile as needed.
+     * Proceed to the authentication, checking with the adapter if the previously authenticated user is not trusted, and
+     * creating and synchronizing user profile as needed.
      *
      * @param currentUser the currently authenticated user (serialized reference of his profile name).
      * @return the authenticated user (document reference to the user profile).
@@ -206,6 +217,10 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
         persistenceStore.store(authenticatedUser);
         logger.debug("User [{}] authenticated from the authentication adapter and saved to persistence store.",
             authenticatedUser);
+
+        // Notify listeners about this new authentication
+        this.observation.notify(new UserAuthenticatedEvent(this.userReferenceResolver.resolve(userProfile)), null);
+
         return userProfile;
     }
 
@@ -341,8 +356,8 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
 
         if (!(groupInRefs.isEmpty() && groupOutRefs.isEmpty() && groupInWithAutoCreateRefs.isEmpty())) {
             logger.debug("Synchronizing groups for user [{}]...", user);
-            userManager.synchronizeGroupsMembership(user, groupInRefs, groupInWithAutoCreateRefs,
-                groupOutRefs, "Trusted authentication group synchronization");
+            userManager.synchronizeGroupsMembership(user, groupInRefs, groupInWithAutoCreateRefs, groupOutRefs,
+                "Trusted authentication group synchronization");
         }
 
         return true;
@@ -382,15 +397,14 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
 
     /**
      * @return the group matching this role with the given dynamic role configuration.
-     *
      * @param groupInRefs is filled with groups the user should be in.
      * @param groupOutRefs is filled with groups the user should not be in.
      */
     private DocumentReference getGroupForRole(DynamicRoleConfiguration conf, String role)
     {
         if (conf.getRoleRegex().isEmpty() || conf.getReplacement().isEmpty()) {
-            String radical = role.substring(
-                conf.getRolePrefix().length(), role.length() - conf.getRoleSuffix().length());
+            String radical =
+                role.substring(conf.getRolePrefix().length(), role.length() - conf.getRoleSuffix().length());
             return resolveUserOrGroup(conf.getGroupPrefix() + radical + conf.getGroupSuffix());
         }
         return resolveUserOrGroup(role.replaceFirst(conf.getRoleRegex(), conf.getReplacement()));
@@ -398,7 +412,6 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
 
     /**
      * @return the groups concerned by the given dynamic role configuration.
-     *
      * @param conf the dynamic role configuration to use.
      * @param groups the set of groups to filter.
      */
@@ -424,13 +437,12 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     }
 
     /**
-     * Fill the groups in which the user should be added, given the roles provided by the authentication adapter
-     * and the dynamic role configurations.
+     * Fill the groups in which the user should be added, given the roles provided by the authentication adapter and the
+     * dynamic role configurations.
      *
      * @param configurations all the dynamic role configurations.
      * @param groupInRefs is filled with the groups the user should be added to, not to be auto-created.
      * @param groupInWithAutoCreateRefs is filled with the groups the user should be added to, to be auto-created.
-     *
      * @return whether the operation succeeded.
      */
     private boolean addGroupsFromDynamicRoles(Collection<DynamicRoleConfiguration> configurations,
@@ -503,8 +515,8 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     }
 
     /**
-     * Given the groups the user is in and the groups in which this user needs to be added, and
-     * given the dynamic role configurations, fill in the groups from which the user is to be removed.
+     * Given the groups the user is in and the groups in which this user needs to be added, and given the dynamic role
+     * configurations, fill in the groups from which the user is to be removed.
      *
      * @param configurations all the dynamic role configurations.
      * @param groupInRefs the groups the user is to be added to, that are not to be auto-created.
@@ -514,8 +526,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
      */
     private boolean removeGroupsFromDynamicRoles(Collection<DynamicRoleConfiguration> configurations,
         DocumentReference user, Collection<DocumentReference> groupInRefs,
-        Collection<DocumentReference> groupInWithAutoCreateRefs,
-        Collection<DocumentReference> groupOutRefs)
+        Collection<DocumentReference> groupInWithAutoCreateRefs, Collection<DocumentReference> groupOutRefs)
     {
         XWikiContext context = contextProvider.get();
         Collection<DocumentReference> userGroupsNotBeingAdded;
@@ -545,8 +556,8 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     }
 
     /**
-     * Given the groups the user is in and the dynamic role configurations,
-     * fill in the groups to which the user is to be added and from which the user is to be removed.
+     * Given the groups the user is in and the dynamic role configurations, fill in the groups to which the user is to
+     * be added and from which the user is to be removed.
      *
      * @param DocumentReference all the dynamic role configurations.
      * @param groupInRefs is filled with the groups the user is to be added to, not to be auto-created.
@@ -555,13 +566,11 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
      * @return whether the operation succeeded.
      */
     private boolean populateGroupsFromDynamicRoles(DocumentReference user, Collection<DocumentReference> groupInRefs,
-            Collection<DocumentReference> groupInWithAutoCreateRefs,
-            Collection<DocumentReference> groupOutRefs)
+        Collection<DocumentReference> groupInWithAutoCreateRefs, Collection<DocumentReference> groupOutRefs)
     {
         Collection<DynamicRoleConfiguration> configs = configuration.getDynamicRoleConfigurations();
 
-        return configs != null
-            && addGroupsFromDynamicRoles(configs, groupInRefs, groupInWithAutoCreateRefs)
+        return configs != null && addGroupsFromDynamicRoles(configs, groupInRefs, groupInWithAutoCreateRefs)
             && removeGroupsFromDynamicRoles(configs, user, groupInRefs, groupInWithAutoCreateRefs, groupOutRefs);
     }
 
@@ -591,17 +600,18 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
 
     /**
      * If the authenticator adapter provides a global logout URL, wrap the current response in order to rewrite
-     * redirection URL using that external logout, which will be responsible to latter redirect back to the
-     * original location requested. The redirection is not done now because we need to pass through the normal
-     * XWiki logout process first.
+     * redirection URL using that external logout, which will be responsible to latter redirect back to the original
+     * location requested. The redirection is not done now because we need to pass through the normal XWiki logout
+     * process first.
      */
     private void wrapResponseForLogoutRediction()
     {
         XWikiContext context = contextProvider.get();
         if (authenticationAdapter.getLogoutURL(null) != null) {
             logger.debug("Wrapping the response for external logout redirection.");
-            context.setResponse(new RedirectionRewritingResponseWrapper(
-                new RedirectionRewritingResponseWrapper.URLRewriter() {
+            context.setResponse(
+                new RedirectionRewritingResponseWrapper(new RedirectionRewritingResponseWrapper.URLRewriter()
+                {
                     @Override
                     public String rewrite(String location)
                     {
@@ -614,7 +624,8 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
     /**
      * @return true if the current request match the configured logout page pattern.
      */
-    private boolean isLogoutRequest() {
+    private boolean isLogoutRequest()
+    {
         if (logoutMatcher == null) {
             logoutMatcher = new RequestMatcher(configuration.getLogoutPagePattern());
         }

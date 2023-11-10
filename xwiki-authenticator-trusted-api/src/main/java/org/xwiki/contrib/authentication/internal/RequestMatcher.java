@@ -30,10 +30,9 @@ import org.slf4j.LoggerFactory;
 import com.xpn.xwiki.web.XWikiRequest;
 
 /**
- * Helper class to match request against a given pattern using the same pattern syntax that is used by the
- * the form authenticator. This overly complex matching is caused by the usage of the SecurityFilter which
- * itself has a very special matcher (based on Perl5Matcher) to match URLs, that is not following the
- * usual regular expression syntax.
+ * Helper class to match request against a given pattern using the same pattern syntax that is used by the the form
+ * authenticator. This overly complex matching is caused by the usage of the SecurityFilter which itself has a very
+ * special matcher (based on Perl5Matcher) to match URLs, that is not following the usual regular expression syntax.
  *
  * @version $Id$
  */
@@ -67,7 +66,8 @@ public class RequestMatcher
      * @param request the request to match.
      * @return true if the current request match the current logout path.
      */
-    public boolean match(XWikiRequest request) {
+    public boolean match(XWikiRequest request)
+    {
         if (pattern == null) {
             return false;
         }
@@ -79,8 +79,8 @@ public class RequestMatcher
         } catch (Exception e) {
             LOGGER.warn("Unexpected exception during request matching", e);
         }
-        LOGGER.debug("Matching [{}] against [{}] has resulted to a {} match",
-            requestPath, pattern.getPattern(), matched ? "successful" : "failed");
+        LOGGER.debug("Matching [{}] against [{}] has resulted to a {} match", requestPath, pattern.getPattern(),
+            matched ? "successful" : "failed");
         return matched;
     }
 
@@ -88,7 +88,8 @@ public class RequestMatcher
      * @param request the request to extract the path from.
      * @return the current request path (servletPath + pathInfo) for easy matching.
      */
-    private String getRequestPath(XWikiRequest request) {
+    private String getRequestPath(XWikiRequest request)
+    {
         String path = request.getServletPath();
         String pathInfo = request.getPathInfo();
         if (pathInfo != null) {

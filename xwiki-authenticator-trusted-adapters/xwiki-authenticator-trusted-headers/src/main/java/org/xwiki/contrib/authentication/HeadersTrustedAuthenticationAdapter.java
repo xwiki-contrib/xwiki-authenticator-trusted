@@ -53,17 +53,26 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
 {
     // Configuration
     private static final String CONFIG_AUTH_FIELD = "auth_field";
+
     private static final String CONFIG_ID_FIELD = "id_field";
+
     private static final String CONFIG_SECRET_FIELD = "secret_field";
+
     private static final String CONFIG_SECRET_VALUE = "secret_value";
+
     private static final String CONFIG_GROUP_FIELD = "group_field";
+
     private static final String CONFIG_GROUP_VALUE_SEPARATOR = "group_value_separator";
+
     private static final String CONFIG_LOGOUT_URL = "logout_url";
+
     private static final String CONFIG_HEADER_ENCODING = "header_encoding";
 
     // Default values for configuration
     private static final String DEFAULT_AUTH_FIELD = "remote_user";
+
     private static final String DEFAULT_ID_FIELD = DEFAULT_AUTH_FIELD;
+
     private static final String DEFAULT_GROUP_VALUE_SEPARATOR = "\\|";
 
     private static final String LOGOUT_URL_REDIRECTION_PLACEHOLDER = "__REDIRECT__";
@@ -90,8 +99,8 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
 
             if (headerSecretValue == null
                 || !headerSecretValue.equals(configuration.getCustomProperty(CONFIG_SECRET_VALUE, null))) {
-                logger.debug("Received invalid value [{}] for secret header [{}], falling back.",
-                    headerSecretValue, secretField);
+                logger.debug("Received invalid value [{}] for secret header [{}], falling back.", headerSecretValue,
+                    secretField);
                 return null;
             }
             logger.debug("Secret validation succeeded.");
@@ -154,14 +163,13 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
     @Override
     public List<String> getUserRoles()
     {
-        List<String> groupFieldNames =
-            configuration.getCustomPropertyAsList(CONFIG_GROUP_FIELD, COMMA_SEPARATOR, null);
+        List<String> groupFieldNames = configuration.getCustomPropertyAsList(CONFIG_GROUP_FIELD, COMMA_SEPARATOR, null);
 
         // Use a set to ensure that we don't send back duplicate roles
         Set<String> headerValues = new HashSet<>();
         if (groupFieldNames != null) {
-            String groupValueSeparator = configuration.getCustomProperty(CONFIG_GROUP_VALUE_SEPARATOR,
-                DEFAULT_GROUP_VALUE_SEPARATOR);
+            String groupValueSeparator =
+                configuration.getCustomProperty(CONFIG_GROUP_VALUE_SEPARATOR, DEFAULT_GROUP_VALUE_SEPARATOR);
 
             for (String groupFieldName : groupFieldNames) {
                 String groupHeaders = getHeader(groupFieldName);
@@ -190,7 +198,8 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
         return logoutUrl;
     }
 
-    private String urlEncode(String text) {
+    private String urlEncode(String text)
+    {
         try {
             return URLEncoder.encode(text, "UTF-8");
         } catch (UnsupportedEncodingException e) {

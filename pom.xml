@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.xwiki.contrib</groupId>
     <artifactId>parent-platform</artifactId>
-    <version>8.4-11</version>
+    <version>13.10</version>
   </parent>
   <groupId>org.xwiki.contrib.authentication</groupId>
   <artifactId>xwiki-authenticator-trusted</artifactId>
@@ -58,12 +58,26 @@
     <url>https://github.com/xwiki-contrib/xwiki-authenticator-trusted/tree/master/</url>
     <tag>HEAD</tag>
   </scm>
+
   <build>
     <plugins>
       <plugin>
-        <!-- Apply the Checkstyle configurations defined in the top level pom.xml file -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
+        <groupId>org.revapi</groupId>
+        <artifactId>revapi-maven-plugin</artifactId>
+        <configuration>
+          <analysisConfiguration>
+            <revapi.filter>
+              <archives>
+                <!-- We don't care about breakages comming from XWiki Standard. -->
+                <exclude>
+                  <item>org\.xwiki\.commons:.*:.*</item>
+                  <item>org\.xwiki\.rendering:.*:.*</item>
+                  <item>org\.xwiki\.platform:.*:.*</item>
+                </exclude>
+              </archives>
+            </revapi.filter>
+          </analysisConfiguration>
+        </configuration>
       </plugin>
     </plugins>
   </build>
