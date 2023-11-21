@@ -41,14 +41,14 @@ import com.xpn.xwiki.web.Utils;
  */
 public class XWikiTrustedAuthenticator extends XWikiAuthServiceImpl
 {
-    private static final Logger LOG = LoggerFactory.getLogger(XWikiTrustedAuthenticator.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(XWikiTrustedAuthenticator.class);
 
-    private TrustedAuthenticator authenticator = Utils.getComponent(TrustedAuthenticator.class);
+    protected TrustedAuthenticator authenticator = Utils.getComponent(TrustedAuthenticator.class);
 
-    private TrustedAuthenticationConfiguration configuration =
+    protected TrustedAuthenticationConfiguration configuration =
         Utils.getComponent(TrustedAuthenticationConfiguration.class);
 
-    private EntityReferenceSerializer<String> compactWikiStringEntityReferenceSerializer =
+    protected EntityReferenceSerializer<String> compactWikiStringEntityReferenceSerializer =
         Utils.getComponent(EntityReferenceSerializer.TYPE_STRING, "compactwiki");
 
     /**
