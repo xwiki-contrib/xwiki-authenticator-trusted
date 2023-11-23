@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -248,8 +249,9 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
     public Collection<DynamicRoleConfiguration> getDynamicRoleConfigurations()
     {
         if (dynamicRoleConfigurations == null) {
-            String[] configurationNames = getCustomProperty(DYNAMIC_ROLE_CONFIGURATIONS_PROPERTY, "").split("\\|");
-            dynamicRoleConfigurations = new ArrayList<DynamicRoleConfiguration>(configurationNames.length);
+            List<String> configurationNames = getCustomPropertyAsList(
+                DYNAMIC_ROLE_CONFIGURATIONS_PROPERTY, '|', Collections.EMPTY_LIST);
+            dynamicRoleConfigurations = new ArrayList(configurationNames.size());
             AddGroupToFieldConfiguration agtfConf = DefaultAddGroupToFieldConfiguration.parse(this,
                 GLOBAL_ADD_GROUP_TO_FIELD_PREFIX, null);
 
