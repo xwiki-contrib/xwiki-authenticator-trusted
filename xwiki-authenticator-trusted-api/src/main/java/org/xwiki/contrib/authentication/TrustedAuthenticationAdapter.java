@@ -54,7 +54,7 @@ public interface TrustedAuthenticationAdapter
      * Name given in parameter will be those from the user property mapping configuration.
      *
      * @param name name of the user property
-     * @return value of the user property or null if this property has no value or does not exists.
+     * @return value of the user property or null if this property has no value or does not exist.
      */
     String getUserProperty(String name);
 

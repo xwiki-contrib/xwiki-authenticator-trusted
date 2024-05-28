@@ -104,7 +104,7 @@ public interface UserManager
      * @param user the reference of the user.
      * @param group the reference of the group.
      * @param comment the comment used for saving modification to the group.
-     * @param create when true, a new group will be created if the group does not exists yet.
+     * @param create when true, a new group will be created if the group does not exist yet.
      * @return true when the user has been successfully added
      */
     boolean addToGroup(DocumentReference user, DocumentReference group, String comment, boolean create);
