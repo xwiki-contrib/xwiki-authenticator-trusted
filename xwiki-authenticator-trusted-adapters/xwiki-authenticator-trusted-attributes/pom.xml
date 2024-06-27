@@ -27,9 +27,9 @@
     <artifactId>xwiki-authenticator-trusted-adapters</artifactId>
     <version>1.8.4-SNAPSHOT</version>
   </parent>
-  <artifactId>xwiki-authenticator-trusted-headers</artifactId>
-  <name>Headers Trusted Authentication Adapter</name>
-  <description>Adapter for the Trusted authentication framework that bases authentication on HTTP headers</description>
+  <artifactId>xwiki-authenticator-trusted-attributes</artifactId>
+  <name>Attributes Trusted Authentication Adapter</name>
+  <description>Adapter for the Trusted authentication framework that bases authentication on Attributes</description>
   <dependencies>
     <dependency>
       <groupId>org.xwiki.platform</groupId>

@@ -32,6 +32,7 @@
   <description>Trusted XWiki authentication adapters</description>
   <modules>
     <module>xwiki-authenticator-trusted-headers</module>
+    <module>xwiki-authenticator-trusted-attributes</module>
   </modules>
   <dependencies>
     <dependency>
