@@ -164,7 +164,8 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
      */
     private DocumentReference authenticate(String previouslyAuthenticatedUser, String userUid)
     {
-        if (userUid == null) {
+        // Sometimes Auth adapters/Auth systems might return an empty (non-null) value. Therefore strict checking here.
+        if (StringUtils.isBlank(userUid)) {
             logger.debug("No user available from trusted authenticator.");
             if (previouslyAuthenticatedUser != null) {
                 if (configuration.isPersistenceStoreTrustedOnMissingAuthentication()) {
@@ -232,7 +233,12 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
      */
     private DocumentReference getUserProfileReference(String userUid)
     {
+        // Sometimes Auth adapters/Auth systems might return an empty (non-null) value. Therefore strict checking here.
         String userName = authenticationAdapter.getUserName();
+        if (StringUtils.isBlank(userName)) {
+            throw new UnsupportedOperationException("Cannot work with an empty username!");
+        }
+
         if (!userUid.equals(userName)) {
             throw new UnsupportedOperationException("Not yet implemented");
         }
@@ -328,7 +334,7 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
             for (Map.Entry<String, String> entry : mapping.entrySet()) {
                 String value = authenticationAdapter.getUserProperty(entry.getValue());
 
-                if (!StringUtils.isBlank(value)) {
+                if (StringUtils.isNotBlank(value)) {
                     extInfos.put(entry.getKey(), value.trim());
                 }
             }
