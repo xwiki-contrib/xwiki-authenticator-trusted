@@ -20,7 +20,6 @@
 
 package org.xwiki.contrib.authentication;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -61,8 +60,6 @@ public class AttributesTrustedAuthenticationAdapter implements TrustedAuthentica
     private static final String CONFIG_GROUP_VALUE_SEPARATOR = "group_value_separator";
 
     private static final String CONFIG_LOGOUT_URL = "logout_url";
-
-    private static final String CONFIG_ATTRIBUTE_ENCODING = "attribute_encoding";
 
     // Default values for configuration
     private static final String DEFAULT_AUTH_FIELD = "remote_user";
@@ -125,22 +122,15 @@ public class AttributesTrustedAuthenticationAdapter implements TrustedAuthentica
             return null;
         }
 
-        String value = (String) request.getAtrribute(name);
+        // Returns an Object:
+        // https://tomcat.apache.org/tomcat-9.0-doc/servletapi/javax/servlet/ServletRequest.html#getAttribute(java.lang.String)
+        Object value = request.getAttribute(name);
 
-        if (StringUtils.isNotBlank(value)) {
-            String encoding = configuration.getCustomProperty(CONFIG_ATTRIBUTE_ENCODING, null);
-            if (StringUtils.isNotBlank(encoding) && Charset.isSupported(encoding)) {
-                try {
-                    value = new String(value.getBytes("ISO-8859-1"), encoding);
-                } catch (UnsupportedEncodingException e) {
-                    logger.debug("Failed to decode attribute [{}] using charset [{}].", name, encoding, e);
-                }
-            } else {
-                logger.debug("Unsupported charset [{}] requested for decoding attribute.", encoding);
-            }
+        if (!(value instanceof String)) {
+            return null; // Can only work with strings
         }
 
-        return value;
+        return ((String) value).trim();
     }
 
     @Override
