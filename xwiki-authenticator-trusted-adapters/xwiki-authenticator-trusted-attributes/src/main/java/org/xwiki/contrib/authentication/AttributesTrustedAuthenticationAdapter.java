@@ -20,8 +20,8 @@
 
 package org.xwiki.contrib.authentication;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -34,7 +34,6 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 
 import com.xpn.xwiki.XWikiContext;
@@ -43,6 +42,7 @@ import com.xpn.xwiki.web.XWikiRequest;
 /**
  * Implementation of the {@link TrustedAuthenticationAdapter} for attributes authentication.
  *
+ * @version $Id$
  * @since 1.9.0
  */
 @Component
@@ -71,9 +71,6 @@ public class AttributesTrustedAuthenticationAdapter implements TrustedAuthentica
     private static final String LOGOUT_URL_REDIRECTION_PLACEHOLDER = "__REDIRECT__";
 
     private static final char COMMA_SEPARATOR = ',';
-
-    @Inject
-    private Logger logger;
 
     @Inject
     private TrustedAuthenticationConfiguration configuration;
@@ -122,12 +119,11 @@ public class AttributesTrustedAuthenticationAdapter implements TrustedAuthentica
             return null;
         }
 
-        // Returns an Object:
-        // https://tomcat.apache.org/tomcat-9.0-doc/servletapi/javax/servlet/ServletRequest.html#getAttribute(java.lang.String)
         Object value = request.getAttribute(name);
 
         if (!(value instanceof String)) {
-            return null; // Can only work with strings
+            // Can only work with strings
+            return null;
         }
 
         return ((String) value).trim();
