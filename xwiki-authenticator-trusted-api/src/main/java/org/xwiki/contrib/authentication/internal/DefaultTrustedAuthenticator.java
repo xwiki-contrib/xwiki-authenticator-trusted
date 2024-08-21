@@ -54,6 +54,8 @@ import org.xwiki.user.UserReferenceResolver;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
 
+import liquibase.repackaged.org.apache.commons.lang3.RegExUtils;
+
 /**
  * Default implementation of the {@link TrustedAuthenticator} role.
  *
@@ -411,9 +413,9 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
         if (conf.getRoleRegex().isEmpty() || conf.getReplacement().isEmpty()) {
             String radical =
                 role.substring(conf.getRolePrefix().length(), role.length() - conf.getRoleSuffix().length());
-            return resolveUserOrGroup(conf.getGroupPrefix() + radical + conf.getGroupSuffix());
+            return resolveUserOrGroup(clean(conf.getGroupPrefix() + radical + conf.getGroupSuffix()));
         }
-        return resolveUserOrGroup(role.replaceFirst(conf.getRoleRegex(), conf.getReplacement()));
+        return resolveUserOrGroup(clean(role.replaceFirst(conf.getRoleRegex(), conf.getReplacement())));
     }
 
     /**
@@ -637,5 +639,10 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
         }
 
         return logoutMatcher.match(contextProvider.get().getRequest());
+    }
+
+    private String clean(String str)
+    {
+        return RegExUtils.removePattern(str, "[\\.\\:\\s,@\\^\\/]");
     }
 }
