@@ -43,6 +43,7 @@
   <modules>
     <module>xwiki-authenticator-trusted-api</module>
     <module>xwiki-authenticator-trusted-adapters</module>
+    <module>xwiki-authenticator-trusted-xip</module>
   </modules>
   <developers>
     <developer>
