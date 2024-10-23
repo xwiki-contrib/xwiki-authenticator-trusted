@@ -32,6 +32,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.RegExUtils;
 import org.slf4j.Logger;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.phase.Initializable;
@@ -53,8 +54,6 @@ import org.xwiki.user.UserReferenceResolver;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
-
-import liquibase.repackaged.org.apache.commons.lang3.RegExUtils;
 
 /**
  * Default implementation of the {@link TrustedAuthenticator} role.
