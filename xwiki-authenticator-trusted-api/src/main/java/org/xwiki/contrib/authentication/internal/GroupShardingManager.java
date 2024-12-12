@@ -30,6 +30,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.authentication.GroupShardingConfiguration;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
+import org.xwiki.model.reference.LocalDocumentReference;
 import org.xwiki.user.group.GroupException;
 import org.xwiki.user.group.GroupManager;
 
@@ -49,6 +50,9 @@ import com.xpn.xwiki.objects.BaseObject;
 @Singleton
 public class GroupShardingManager
 {
+    private static final LocalDocumentReference GROUP_CLASS_REFERENCE =
+        new LocalDocumentReference("XWiki", "XWikiGroups");
+
     @Inject
     private GroupShardingConfiguration groupShardingConfiguration;
 
@@ -97,7 +101,7 @@ public class GroupShardingManager
 
         try {
             // Let's first make sure the shard has actually to be set-up
-            if (groupManager.getMembers(group, false).contains(shard)) {
+            if (!groupManager.getMembers(group, false).contains(shard)) {
                 XWikiDocument groupDocument = xwiki.getDocument(group, context);
                 addGroupShard(groupDocument, shard, context);
                 xwiki.saveDocument(groupDocument, String.format("Add shard [%s]", shard.getName()), context);
@@ -118,12 +122,7 @@ public class GroupShardingManager
     public void addGroupShard(XWikiDocument groupDocument, DocumentReference shard, XWikiContext context)
         throws XWikiException
     {
-        BaseObject groupObject = groupDocument.newXObject(getGroupClass(context), context);
+        BaseObject groupObject = groupDocument.newXObject(GROUP_CLASS_REFERENCE, context);
         groupObject.setStringValue("member", entityReferenceSerializer.serialize(shard));
-    }
-
-    private DocumentReference getGroupClass(XWikiContext context) throws XWikiException
-    {
-        return context.getWiki().getGroupClass(context).getXClassReference();
     }
 }
