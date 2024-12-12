@@ -1,6 +1,9 @@
 org.xwiki.contrib.authentication.internal.CookieAuthenticationPersistenceStore
+org.xwiki.contrib.authentication.internal.DefaultGroupShardingConfiguration
 org.xwiki.contrib.authentication.internal.DefaultTrustedAuthenticationConfiguration
 org.xwiki.contrib.authentication.internal.DefaultTrustedAuthenticator
 org.xwiki.contrib.authentication.internal.DefaultUserManager
+org.xwiki.contrib.authentication.internal.GroupShardingManager
 org.xwiki.contrib.authentication.internal.SessionAuthenticationPersistenceStore
+org.xwiki.contrib.authentication.internal.ShardingUserManager
 org.xwiki.contrib.authentication.internal.XWikiTrustedAuthService
