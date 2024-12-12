@@ -409,12 +409,15 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
      */
     private DocumentReference getGroupForRole(DynamicRoleConfiguration conf, String role)
     {
+        String group;
         if (conf.getRoleRegex().isEmpty() || conf.getReplacement().isEmpty()) {
             String radical =
                 role.substring(conf.getRolePrefix().length(), role.length() - conf.getRoleSuffix().length());
-            return resolveUserOrGroup(clean(conf.getGroupPrefix() + radical + conf.getGroupSuffix()));
+            group = conf.getGroupPrefix() + radical + conf.getGroupSuffix();
+            return resolveUserOrGroup((configuration.cleanDynamicRoles()) ? clean(group) : group);
         }
-        return resolveUserOrGroup(clean(role.replaceFirst(conf.getRoleRegex(), conf.getReplacement())));
+        group = role.replaceFirst(conf.getRoleRegex(), conf.getReplacement());
+        return resolveUserOrGroup((configuration.cleanDynamicRoles()) ? clean(group) : group);
     }
 
     /**

@@ -223,4 +223,14 @@ public interface TrustedAuthenticationConfiguration
         return Collections.emptyList();
     }
 
+    /**
+     * @return true if group names computed from dynamic roles should be cleaned before being used. Defaults to true
+     * (group names will be cleaned). Should be set to false if users are upgrading from the trusted authentication
+     * framework < 1.9.1 with dynamic roles enabled.
+     * @since 1.9.4
+     */
+    default boolean cleanDynamicRoles()
+    {
+        return true;
+    }
 }

@@ -95,6 +95,7 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
     private static final String DYNAMIC_ROLE_CONFIGURATIONS_PROPERTY = DYNAMIC_ROLE_PROPERTY + ".configurations";
     private static final String DYNAMIC_ROLE_CONFIGURATION_PREFIX = DYNAMIC_ROLE_PROPERTY + ".configuration.";
     private static final String LOGOUTPAGE_CONFIG_KEY = "xwiki.authentication.logoutpage";
+    private static final String CLEAN_DYNAMIC_ROLES_PROPERTY = DYNAMIC_ROLE_PROPERTY + ".clean";
 
     @Inject
     private ComponentManager componentManager;
@@ -270,5 +271,11 @@ public class DefaultTrustedAuthenticationConfiguration extends AbstractConfig
             }
         }
         return dynamicRoleConfigurations;
+    }
+
+    @Override
+    public boolean cleanDynamicRoles()
+    {
+        return getCustomPropertyAsBoolean(CLEAN_DYNAMIC_ROLES_PROPERTY, true);
     }
 }
