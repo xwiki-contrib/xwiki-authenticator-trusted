@@ -76,6 +76,9 @@ public class ShardingUserManager implements UserManager
         Collection<DocumentReference> shardedGroupInRefs = new HashSet<>();
         for (DocumentReference groupInRef : groupInRefs) {
             DocumentReference shardedGroupReference = groupShardingManager.getShardedGroupReference(groupInRef, user);
+            if (!shardedGroupReference.equals(groupInRef)) {
+                groupShardingManager.setupGroupShard(groupInRef, shardedGroupReference);
+            }
             shardedGroupInRefs.add(shardedGroupReference);
         }
 
