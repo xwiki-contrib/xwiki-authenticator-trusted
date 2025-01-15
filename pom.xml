@@ -30,7 +30,7 @@
   <groupId>org.xwiki.contrib.authentication</groupId>
   <artifactId>xwiki-authenticator-trusted</artifactId>
   <name>Trusted authenticators for XWiki</name>
-  <version>1.9.5</version>
+  <version>1.9.6-SNAPSHOT</version>
   <description>Parent project for trusted authenticators</description>
   <properties>
     <!-- XWiki supports only one authenticator for the same instance -->
@@ -57,7 +57,7 @@
     <connection>scm:git:git://github.com/xwiki-contrib/xwiki-authenticator-trusted.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/xwiki-authenticator-trusted.git</developerConnection>
     <url>https://github.com/xwiki-contrib/xwiki-authenticator-trusted/tree/master/</url>
-    <tag>xwiki-authenticator-trusted-1.9.5</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <build>
