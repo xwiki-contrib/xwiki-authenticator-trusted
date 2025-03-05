@@ -579,8 +579,15 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
         Collection<DocumentReference> groupInWithAutoCreateRefs, Collection<DocumentReference> groupOutRefs)
     {
         Collection<DynamicRoleConfiguration> configs = configuration.getDynamicRoleConfigurations();
+        if (configs == null) {
+            return false;
+        }
 
-        return configs != null && addGroupsFromDynamicRoles(configs, groupInRefs, groupInWithAutoCreateRefs)
+        if (configs.isEmpty()) {
+            return true;
+        }
+
+        return addGroupsFromDynamicRoles(configs, groupInRefs, groupInWithAutoCreateRefs)
             && removeGroupsFromDynamicRoles(configs, user, groupInRefs, groupInWithAutoCreateRefs, groupOutRefs);
     }
 
