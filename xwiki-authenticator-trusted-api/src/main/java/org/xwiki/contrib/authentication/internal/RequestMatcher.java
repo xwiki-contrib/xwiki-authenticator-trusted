@@ -20,7 +20,7 @@
 
 package org.xwiki.contrib.authentication.internal;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.securityfilter.filter.URLPattern;
 import org.securityfilter.filter.URLPatternFactory;
 import org.securityfilter.filter.URLPatternMatcher;

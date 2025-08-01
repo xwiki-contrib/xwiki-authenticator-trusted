@@ -28,7 +28,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.authentication.AuthenticationPersistenceStore;
 import org.slf4j.Logger;
