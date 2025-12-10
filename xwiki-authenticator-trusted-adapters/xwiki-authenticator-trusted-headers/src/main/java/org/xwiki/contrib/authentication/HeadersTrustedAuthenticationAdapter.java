@@ -145,6 +145,8 @@ public class HeadersTrustedAuthenticationAdapter implements TrustedAuthenticatio
         String value = request.getHeader(name);
 
         if (StringUtils.isNotBlank(value)) {
+            this.logger.debug("Retrieved header [{}] with value [{}].", name, value);
+
             String encoding = configuration.getCustomProperty(CONFIG_HEADER_ENCODING, null);
             if (StringUtils.isNotBlank(encoding) && Charset.isSupported(encoding)) {
                 try {
