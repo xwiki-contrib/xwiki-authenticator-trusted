@@ -413,11 +413,12 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
         if (conf.getRoleRegex().isEmpty() || conf.getReplacement().isEmpty()) {
             String radical =
                 role.substring(conf.getRolePrefix().length(), role.length() - conf.getRoleSuffix().length());
-            group = conf.getGroupPrefix() + radical + conf.getGroupSuffix();
-            return resolveUserOrGroup((configuration.cleanDynamicRoles()) ? clean(group) : group);
+            group = conf.getGroupPrefix() + (configuration.cleanDynamicRoles() ? clean(radical) : radical)
+                + conf.getGroupSuffix();
+            return resolveUserOrGroup(group);
         }
         group = role.replaceFirst(conf.getRoleRegex(), conf.getReplacement());
-        return resolveUserOrGroup((configuration.cleanDynamicRoles()) ? clean(group) : group);
+        return resolveUserOrGroup(group);
     }
 
     /**
