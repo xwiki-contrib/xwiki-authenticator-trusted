@@ -404,8 +404,8 @@ public class DefaultTrustedAuthenticator implements TrustedAuthenticator, Initia
 
     /**
      * @return the group matching this role with the given dynamic role configuration.
-     * @param groupInRefs is filled with groups the user should be in.
-     * @param groupOutRefs is filled with groups the user should not be in.
+     * @param conf the group configuration
+     * @param role the dynamic role the given group configuration is associated with
      */
     private DocumentReference getGroupForRole(DynamicRoleConfiguration conf, String role)
     {
