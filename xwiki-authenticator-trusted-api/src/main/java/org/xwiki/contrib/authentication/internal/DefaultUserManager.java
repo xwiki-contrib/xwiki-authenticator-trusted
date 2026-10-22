@@ -195,7 +195,7 @@ public class DefaultUserManager implements UserManager
 
         try {
             BaseClass groupClass = context.getWiki().getGroupClass(context);
-            String userName = compactWikiEntityReferenceSerializer.serialize(user);
+            String userName = compactWikiEntityReferenceSerializer.serialize(user, group);
 
             // Get the XWiki document holding the objects comprising the group membership list
             XWikiDocument groupDoc = context.getWiki().getDocument(group, context);
@@ -230,7 +230,7 @@ public class DefaultUserManager implements UserManager
 
         try {
             BaseClass groupClass = context.getWiki().getGroupClass(context);
-            String userName = compactWikiEntityReferenceSerializer.serialize(user);
+            String userName = compactWikiEntityReferenceSerializer.serialize(user, group);
 
             // Get document representing group
             XWikiDocument groupDoc = context.getWiki().getDocument(group, context);
