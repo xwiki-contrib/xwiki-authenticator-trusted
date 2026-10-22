@@ -207,7 +207,9 @@ public class DefaultUserManager implements UserManager
 
             groupDoc = groupDoc.clone();
             // Get and remove the specific group membership object for the user
-            BaseObject groupObj = groupDoc.getXObject(groupClass.getReference(), GROUP_PROPERTY_MEMBER, userName);
+            BaseObject groupObj =
+                groupDoc.getXObject(groupClass.getReference().getLocalDocumentReference(), GROUP_PROPERTY_MEMBER,
+                    userName, false);
 
             if (groupObj != null) {
                 groupDoc.removeXObject(groupObj);
@@ -247,11 +249,14 @@ public class DefaultUserManager implements UserManager
             }
 
             // Get and remove the specific group membership object for the user
-            BaseObject groupObj = groupDoc.getXObject(groupClass.getReference(), GROUP_PROPERTY_MEMBER, userName);
+            BaseObject groupObj =
+                groupDoc.getXObject(groupClass.getReference().getLocalDocumentReference(), GROUP_PROPERTY_MEMBER,
+                    userName, false);
 
             if (groupObj == null) {
                 // Add a member object to document
-                BaseObject memberObj = groupDoc.newXObject(groupClass.getReference(), context);
+                BaseObject memberObj = groupDoc.newXObject(groupClass.getReference().getLocalDocumentReference(),
+                    context);
                 memberObj.setStringValue(GROUP_PROPERTY_MEMBER, userName);
 
                 // Save modifications
