@@ -35,6 +35,7 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.contrib.authentication.UserManager;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReferenceSerializer;
+import org.xwiki.model.reference.LocalDocumentReference;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -194,8 +195,9 @@ public class DefaultUserManager implements UserManager
         XWikiContext context = contextProvider.get();
 
         try {
-            BaseClass groupClass = context.getWiki().getGroupClass(context);
-            String userName = compactWikiEntityReferenceSerializer.serialize(user);
+            LocalDocumentReference groupClassRef = context.getWiki().getGroupClass(context).getReference()
+                .getLocalDocumentReference();
+            String userName = compactWikiEntityReferenceSerializer.serialize(user, group);
 
             // Get the XWiki document holding the objects comprising the group membership list
             XWikiDocument groupDoc = context.getWiki().getDocument(group, context);
@@ -207,7 +209,8 @@ public class DefaultUserManager implements UserManager
 
             groupDoc = groupDoc.clone();
             // Get and remove the specific group membership object for the user
-            BaseObject groupObj = groupDoc.getXObject(groupClass.getReference(), GROUP_PROPERTY_MEMBER, userName);
+            BaseObject groupObj =
+                groupDoc.getXObject(groupClassRef, GROUP_PROPERTY_MEMBER, userName, false);
 
             if (groupObj != null) {
                 groupDoc.removeXObject(groupObj);
@@ -229,8 +232,9 @@ public class DefaultUserManager implements UserManager
         XWikiContext context = contextProvider.get();
 
         try {
-            BaseClass groupClass = context.getWiki().getGroupClass(context);
-            String userName = compactWikiEntityReferenceSerializer.serialize(user);
+            LocalDocumentReference groupClassRef = context.getWiki().getGroupClass(context).getReference()
+                .getLocalDocumentReference();
+            String userName = compactWikiEntityReferenceSerializer.serialize(user, group);
 
             // Get document representing group
             XWikiDocument groupDoc = context.getWiki().getDocument(group, context);
@@ -247,11 +251,12 @@ public class DefaultUserManager implements UserManager
             }
 
             // Get and remove the specific group membership object for the user
-            BaseObject groupObj = groupDoc.getXObject(groupClass.getReference(), GROUP_PROPERTY_MEMBER, userName);
+            BaseObject groupObj =
+                groupDoc.getXObject(groupClassRef, GROUP_PROPERTY_MEMBER, userName, false);
 
             if (groupObj == null) {
                 // Add a member object to document
-                BaseObject memberObj = groupDoc.newXObject(groupClass.getReference(), context);
+                BaseObject memberObj = groupDoc.newXObject(groupClassRef, context);
                 memberObj.setStringValue(GROUP_PROPERTY_MEMBER, userName);
 
                 // Save modifications
